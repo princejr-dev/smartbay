@@ -29,7 +29,7 @@ export default function App() {
   const renderPage = () => {
     switch (activePage) {
       case 'dashboard': return <Dashboard onNavigate={setActivePage} />;
-      case 'tenants': return <Tenants key="tenants" onNavigate={setActivePage} modalOpen={modalOpen} onModalClose={() => setModalOpen(false)} />;
+      case 'tenants': return <Tenants key="tenants" onNavigate={setActivePage} modalOpen={modalOpen} onModalClose={() => setModalOpen(false)} onBack={() => setActivePage('dashboard')} />;
       case 'notifications': return <Notifications onBack={() => setActivePage('dashboard')} />;
       case 'settings': return <Settings onBack={() => setActivePage('dashboard')} onThemeChange={setTheme} />;
       default: return <Dashboard onNavigate={setActivePage} />;
@@ -41,7 +41,7 @@ export default function App() {
       <main className="max-w-2xl mx-auto pb-24">
         {renderPage()}
       </main>
-      {activePage !== 'notifications' && activePage !== 'settings' && (
+      {activePage !== 'tenants' && activePage !== 'notifications' && activePage !== 'settings' && (
         <Navbar
           activePage={activePage}
           onNavigate={(page) => {

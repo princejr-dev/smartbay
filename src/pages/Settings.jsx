@@ -21,7 +21,7 @@ const [tenantCount, setTenantCount] = useState(() => loadTenants().length);
 
   // Supprime toutes les données
   const handleClearData = () => {
-    if (window.confirm('Toutes vos données seront supprimées. Cette action est irréversible.')) {
+    if (window.confirm('Attention ! Toutes vos données seront supprimées. Cette action est irréversible. Voulez-vous continuer ?')) {
       clearAll();
       setTenantCount(0);
       window.location.reload();
@@ -32,7 +32,7 @@ const [tenantCount, setTenantCount] = useState(() => loadTenants().length);
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
 
       {/* Header avec bouton retour */}
-      <div className="bg-gradient-to-br from-accent to-accent-dark px-6 pt-12 pb-6">
+      <div className="bg-gradient-to-br from-accent to-accent-dark px-6 pt-12 pb-6 sticky top-0 z-20">
         <div className="flex items-center gap-4">
           <button
             onClick={onBack}
@@ -115,7 +115,7 @@ const [tenantCount, setTenantCount] = useState(() => loadTenants().length);
                       : 'border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400'
                     }`}
                 >
-                  {d}j
+                {d} {d <= 1 ? 'jour' : 'jours'}
                 </button>
               ))}
             </div>
@@ -167,7 +167,7 @@ const [tenantCount, setTenantCount] = useState(() => loadTenants().length);
               </div>
               <p className="font-semibold text-gray-800 dark:text-white text-sm">Version</p>
             </div>
-            <span className="text-gray-400 text-sm">1.0.0</span>
+            <span className="text-gray-400 text-sm">0.1.3</span>
           </div>
         </div>
       </div>

@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { Search, X, Trash2 } from 'lucide-react';
+import { Search, X, Trash2, ArrowLeft } from 'lucide-react';
 import TenantCard from '../components/TenantCard';
 import TenantModal from '../components/TenantModal';
 import { loadTenants, saveTenants } from '../utils/storage';
 import { getDaysUntilExpiry } from '../utils/helpers';
 import { generateReceipt } from '../utils/receipt';
 
-export default function Tenants({ modalOpen, onModalClose }) {
+export default function Tenants({ onBack, modalOpen, onModalClose }) {
   const [tenants, setTenants] = useState(() => loadTenants());
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState('all');
@@ -43,12 +43,12 @@ export default function Tenants({ modalOpen, onModalClose }) {
         t.id === tenantData.id ? tenantData : t
       );
 
-      showToast(`✅ ${tenantData.civility} ${tenantData.name} modifié !`);
+      showToast(`✅ Modifié avec succès !`);
     } else {
       // Ajout
       updated = [...tenants, tenantData];
 
-      showToast(`✅ ${tenantData.civility} ${tenantData.name} ajouté !`);
+      showToast(`✅ Ajouté avec succès !`);
     }
 
     setTenants(updated);
@@ -65,7 +65,7 @@ export default function Tenants({ modalOpen, onModalClose }) {
   const handleDelete = (id) => {
     const tenant = tenants.find(t => t.id === id);
 
-    if (window.confirm(`Supprimer ${tenant.civility} ${tenant.name} ?`)) {
+    if (window.confirm(`Voulez-vous supprimer ${tenant.civility} ${tenant.name} ?`)) {
       const updated = tenants.filter(t => t.id !== id);
 
       setTenants(updated);
@@ -73,7 +73,7 @@ export default function Tenants({ modalOpen, onModalClose }) {
 
       showToast(
        <span className="flex items-center justify-center gap-2">
-        <Trash2 size={16} />{tenant.name} supprimé !
+        <Trash2 size={16} /> Vous avez supprimé {tenant.civility} {tenant.name} !
        </span> );
     }
   };
@@ -122,20 +122,28 @@ export default function Tenants({ modalOpen, onModalClose }) {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
 
       {/* Header */}
-      <div className="bg-gradient-to-br from-accent to-accent-dark px-6 pt-12 pb-6">
-        <h1 className="text-white text-2xl font-bold mb-1">
+      <div className="bg-gradient-to-br from-accent to-accent-dark px-6 pt-12 pb-6 sticky top-0 z-20">
+        <div className="flex items-center gap-4 mb-2">
+          <button
+            onClick={onBack}
+            className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors"
+          >
+            <ArrowLeft size={20} className="text-white" />
+          </button>
+          <h1 className="text-white text-2xl font-bold mb-1">
           Mes locataires
         </h1>
+        </div>
 
-        <p className="text-white/70 text-sm">
-          {tenants.length} locataire{tenants.length > 1 ? 's' : ''}
+        <p className="text-white/70 text-sm font-semibold">
+          {tenants.length} locataire{tenants.length > 1 ? 's' : ''} disponible{tenants.length > 1 ? 's' : ''}
         </p>
       </div>
 
       <div className="px-5 pt-5">
 
         {/* Barre de recherche */}
-        <div className="flex items-center gap-3 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 rounded-xl px-4 mb-4 focus-within:border-accent">
+        <div className="flex items-center gap-3 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 rounded-xl px-4 mb-4 focus-within:border-accent dark:focus-within:border-accent">
 
           <Search
             size={18}

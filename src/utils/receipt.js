@@ -142,6 +142,7 @@ export function generateReceipt(tenant) {
     }
   </style>
 </head>
+
 <body>
   <div class="header">
     <div class="app-name">SmartBay</div>

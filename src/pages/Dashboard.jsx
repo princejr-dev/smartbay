@@ -29,9 +29,9 @@ export default function Dashboard({ onNavigate }) {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
 
       {/* Header gradient */}
-      <div className="bg-gradient-to-br from-accent to-accent-dark px-6 pt-12 pb-20">
-        <h1 className="text-white text-4xl font-audiowide">SmartBay</h1>
-        <p className="text-white/70 text-sm mt-1 font-bold">Gestion locative intelligente</p>
+      <div className="bg-gradient-to-br from-accent to-accent-dark px-6 pt-8 pb-20">
+        <h1 className="text-white text-3xl font-audiowide">SmartBay</h1>
+        <p className="text-white/70 text-sm mt-1 font-semibold">Gestion locative intelligente</p>
       </div>
 
       {/* Contenu principal avec chevauchement */}
@@ -103,7 +103,7 @@ export default function Dashboard({ onNavigate }) {
               <div key={t.id} className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700 last:border-0">
                 <div>
                   <p className="font-semibold text-gray-800 dark:text-white text-sm">{t.civility} {t.name}</p>
-                  <p className="text-red-500 text-xs mt-0.5">Expiré depuis {Math.abs(getDaysUntilExpiry(t.endDate))}j</p>
+                  <p className="text-red-500 text-xs mt-0.5">Expiré depuis {Math.abs(getDaysUntilExpiry(t.endDate))} {Math.abs(getDaysUntilExpiry(t.endDate)) <= 1 ? 'jour' : 'jours'}</p>
                 </div>
                 <p className="text-red-500 font-bold text-sm">{formatNumber(t.rent)} FCFA</p>
               </div>
@@ -113,7 +113,7 @@ export default function Dashboard({ onNavigate }) {
               <div key={t.id} className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700 last:border-0">
                 <div>
                   <p className="font-semibold text-gray-800 dark:text-white text-sm">{t.civility} {t.name}</p>
-                  <p className="text-orange-500 text-xs mt-0.5">Expire dans {getDaysUntilExpiry(t.endDate)}j</p>
+                  <p className="text-orange-500 text-xs mt-0.5">Expire dans {getDaysUntilExpiry(t.endDate)} {getDaysUntilExpiry(t.endDate) <= 1 ? 'jour' : 'jours'}</p>
                 </div>
                 <p className="text-orange-500 font-bold text-sm">{formatNumber(t.rent)} FCFA</p>
               </div>
@@ -128,18 +128,13 @@ export default function Dashboard({ onNavigate }) {
               <Users size={32} className="text-accent" />
             </div>
             <p className="text-gray-500 dark:text-gray-400 mb-4">Aucun locataire pour le moment</p>
-            <button
-              onClick={() => onNavigate('add')}
-              className="bg-gradient-to-r from-accent to-accent-dark text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-all"
-            >
-              Ajouter un locataire
-            </button>
           </div>
         ) : (
           <button
             onClick={() => onNavigate('tenants')}
             className="w-full bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-4 flex items-center justify-between mb-5 hover:shadow-md transition-shadow"
           >
+            <Users size={20} className="text-accent" />
             <span className="font-semibold text-gray-700 dark:text-gray-300">Voir tous les locataires</span>
             <ArrowRight size={18} className="text-accent" />
           </button>

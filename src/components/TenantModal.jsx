@@ -69,8 +69,8 @@ export default function TenantModal({ visible, tenant, onSave, onClose }) {
 
   return (
     // Fond semi-transparent
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm dark:bg-gray-800 overflow-y-auto">
-      <div className="w-[65vh] max-w-2xl bg-white dark:bg-gray-800 rounded-t-3xl mx-auto p-6 max-h-[95vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm overflow-y-auto">
+      <div className="w-[65vh] max-w-2xl bg-white dark:bg-gray-800 rounded-3xl mx-auto p-8 max-h-[95vh] overflow-y-auto">
 
         {/* Barre de handle */}
         <div className="w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-5" />
@@ -78,7 +78,7 @@ export default function TenantModal({ visible, tenant, onSave, onClose }) {
         {/* En-tête */}
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold text-gray-800 dark:text-white">
-            {tenant ? 'Modifier le locataire' : 'Nouveau locataire'}
+            {tenant ? 'Modifier le locataire' : 'Ajouter un locataire'}
           </h2>
           <button
             onClick={onClose}

@@ -82,7 +82,7 @@ export default function Notifications({ onBack }) {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="bg-gradient-to-br from-accent to-accent-dark px-6 pt-12 pb-6">
+      <div className="bg-gradient-to-br from-accent to-accent-dark px-6 pt-12 pb-6 sticky top-0 z-20">
         <div className="flex items-center gap-4 mb-2">
           <button
             onClick={onBack}
@@ -93,7 +93,7 @@ export default function Notifications({ onBack }) {
           <h1 className="text-white text-2xl font-bold">Notifications</h1>
         </div>
         {totalAlerts > 0 && (
-          <p className="text-white/70 text-sm">
+          <p className="text-white/70 text-sm font-semibold">
             {totalAlerts} alerte{totalAlerts > 1 ? 's' : ''} en attente
           </p>
         )}

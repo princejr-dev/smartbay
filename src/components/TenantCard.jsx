@@ -8,10 +8,10 @@ export default function TenantCard({ tenant, onEdit, onDelete, onReceipt }) {
 
   // Couleur et icône selon le statut
   const statusConfig = isExpired
-    ? { color: 'text-red-500', bg: 'bg-red-50 dark:bg-red-900/20', border: 'border-l-red-500', icon: AlertCircle, label: `Expiré depuis ${Math.abs(days)}j` }
+    ? { color: 'text-red-500', bg: 'bg-red-50 dark:bg-red-900/20', border: 'border-l-red-500', icon: AlertCircle, label: `Expiré depuis ${Math.abs(days)} ${Math.abs(days) <= 1 ? 'jour' : 'jours'}` }
     : isExpiringSoon
-    ? { color: 'text-orange-500', bg: 'bg-orange-50 dark:bg-orange-900/20', border: 'border-l-orange-500', icon: Clock, label: `Expire dans ${days}j` }
-    : { color: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20', border: 'border-l-green-500', icon: CheckCircle, label: `Actif — ${days}j restants` };
+    ? { color: 'text-orange-500', bg: 'bg-orange-50 dark:bg-orange-900/20', border: 'border-l-orange-500', icon: Clock, label: `Expire dans ${days} ${days <= 1 ? 'jour' : 'jours'}` }
+    : { color: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20', border: 'border-l-green-500', icon: CheckCircle, label: `Actif — ${days} ${days <= 1 ? 'jour' : 'jours'} restants` };
 
   const StatusIcon = statusConfig.icon;
 
