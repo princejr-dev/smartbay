@@ -69,8 +69,11 @@ export default function TenantModal({ visible, tenant, onSave, onClose }) {
 
   return (
     // Fond semi-transparent
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm overflow-y-auto">
-      <div className="w-[65vh] max-w-2xl bg-white dark:bg-gray-800 rounded-3xl mx-auto p-8 max-h-[95vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm">
+  
+  {/* Conteneur scrollable centré */}
+  <div className="h-full overflow-y-auto flex justify-center py-6 px-4">
+    <div className="w-full max-w-lg bg-white dark:bg-gray-800 rounded-3xl p-8 h-fit">
 
         {/* Barre de handle */}
         <div className="w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-5" />
@@ -84,7 +87,7 @@ export default function TenantModal({ visible, tenant, onSave, onClose }) {
             onClick={onClose}
             className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500"
           >
-            <X size={20} />
+            <X size={22} />
           </button>
         </div>
 
@@ -248,6 +251,7 @@ export default function TenantModal({ visible, tenant, onSave, onClose }) {
           </button>
         </div>
       </div>
+    </div>
     </div>
   );
 }

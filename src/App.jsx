@@ -5,6 +5,7 @@ import Tenants from './pages/Tenants';
 import Notifications from './pages/Notifications';
 import Settings from './pages/Settings';
 import { loadSettings } from './utils/storage';
+import Landing from './pages/Landing';
 
 // Initialise le thème avant le premier rendu
 const initialSettings = loadSettings();
@@ -17,6 +18,7 @@ export default function App() {
   const [activePage, setActivePage] = useState('dashboard');
   const [theme, setTheme] = useState(initialTheme);
   const [modalOpen, setModalOpen] = useState(false);
+  const [showLanding, setShowLanding] = useState(true);
 
   useEffect(() => {
     if (theme === 'dark') {
@@ -36,11 +38,22 @@ export default function App() {
     }
   };
 
+  // Reset le scroll en haut à chaque changement de page
+useEffect(() => {
+  window.scrollTo({ top: 0, behavior: 'instant' });
+}, [activePage]);
+
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
+      {showLanding ? (
+      <Landing onEnterApp={() => setShowLanding(false)} />
+    ) : (
+      <>
+
       <main className="max-w-2xl mx-auto pb-24">
         {renderPage()}
       </main>
+
       {activePage !== 'tenants' && activePage !== 'notifications' && activePage !== 'settings' && (
         <Navbar
           activePage={activePage}
@@ -57,6 +70,8 @@ export default function App() {
           hidden={modalOpen}
         />
       )}
+      </>
+       )}
     </div>
   );
 }

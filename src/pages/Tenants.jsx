@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Search, X, Trash2, ArrowLeft } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Search, X, Trash2, ArrowLeft, Plus } from 'lucide-react';
 import TenantCard from '../components/TenantCard';
 import TenantModal from '../components/TenantModal';
 import { loadTenants, saveTenants } from '../utils/storage';
@@ -118,6 +118,20 @@ export default function Tenants({ onBack, modalOpen, onModalClose }) {
     { key: 'expired', label: 'Expirés' },
   ];
 
+  const [fabOpacity, setFabOpacity] = useState(1);
+const scrollTimer = useRef(null);
+
+// Diminue l'opacité du bouton + au scroll
+useEffect(() => {
+  const handleScroll = () => {
+    setFabOpacity(0.3);
+    clearTimeout(scrollTimer.current);
+    scrollTimer.current = setTimeout(() => setFabOpacity(1), 600);
+  };
+  window.addEventListener('scroll', handleScroll);
+  return () => window.removeEventListener('scroll', handleScroll);
+}, []);
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
 
@@ -223,6 +237,15 @@ export default function Tenants({ onBack, modalOpen, onModalClose }) {
           {toast}
         </div>
       )}
+
+      {/* Bouton + flottant bas-droite */}
+      <button 
+      onClick={() => { setEditingTenant(null); setModalVisible(true); }}
+      style={{ opacity: fabOpacity }}
+      className="fixed bottom-6 right-6 z-40 w-14 h-14 bg-gradient-to-br from-accent to-accent-dark text-white rounded-full flex items-center justify-center shadow-xl transition-opacity duration-300 hover:scale-110"
+      >
+      <Plus size={26} />
+      </button>
 
       {/* Modal ajout/modification */}
       <TenantModal

@@ -167,7 +167,7 @@ const [tenantCount, setTenantCount] = useState(() => loadTenants().length);
               </div>
               <p className="font-semibold text-gray-800 dark:text-white text-sm">Version</p>
             </div>
-            <span className="text-gray-400 text-sm">0.1.3</span>
+            <span className="text-gray-400 text-sm">0.3.0</span>
           </div>
         </div>
       </div>
