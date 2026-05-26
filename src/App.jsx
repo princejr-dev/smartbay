@@ -8,6 +8,7 @@ import Tenants from './pages/Tenants';
 import Notifications from './pages/Notifications';
 import Settings from './pages/Settings';
 import Landing from './pages/Landing';
+import PCReceipts from './pages/PCReceipts';
 import { loadSettings, saveSettings } from './utils/storage';
 
 // Initialise le thème avant le premier rendu
@@ -93,6 +94,8 @@ export default function App() {
         return <Notifications onBack={() => setActivePage('dashboard')} />;
       case 'settings':
         return <Settings onBack={() => setActivePage('dashboard')} onThemeChange={handleThemeChange} />;
+      case 'receipts':
+        return <PCReceipts />;
       default:
         return <PCDashboard searchTerm={pcSearchTerm} activePage={activePage} />;
     }
