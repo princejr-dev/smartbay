@@ -64,8 +64,9 @@ export default function Tenants({ onBack, modalOpen, onModalClose }) {
   // Supprime un locataire avec confirmation
   const handleDelete = (id) => {
     const tenant = tenants.find(t => t.id === id);
+    const article = tenant.civility === 'Mme' ? 'la' : 'le';
 
-    if (window.confirm(`Voulez-vous supprimer ${tenant.civility} ${tenant.name} ?`)) {
+    if (window.confirm(`Voulez-vous supprimer ${article} locataire ${tenant.civility} ${tenant.name} ?`)) {
       const updated = tenants.filter(t => t.id !== id);
 
       setTenants(updated);
@@ -73,7 +74,7 @@ export default function Tenants({ onBack, modalOpen, onModalClose }) {
 
       showToast(
        <span className="flex items-center justify-center gap-2">
-        <Trash2 size={16} /> Vous avez supprimé {tenant.civility} {tenant.name} !
+        <Trash2 className='text-red-600 dark:bg-red-900/20' size={16} /> Suppression réussie !
        </span> );
     }
   };

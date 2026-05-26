@@ -36,7 +36,9 @@ Projet GitHub : https://github.com/princejr-dev/smartbay
 Déploiement recommandé : https://vercel.com/
 GitHub Pages : https://pages.github.com/
 
-Après build :
+---
+
+## Après build :
 
 npm run build
 
@@ -49,7 +51,6 @@ Puis déployer le dossier dist/.
 /components → composants réutilisables
 /pages → pages principales
 /utils → fonctions utilitaires
-/assets → fichiers statiques
 
 ---
 

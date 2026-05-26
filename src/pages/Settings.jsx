@@ -31,8 +31,8 @@ const [tenantCount, setTenantCount] = useState(() => loadTenants().length);
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
 
-      {/* Header avec bouton retour */}
-      <div className="bg-gradient-to-br from-accent to-accent-dark px-6 pt-12 pb-6 sticky top-0 z-20">
+      {/* Header mobile uniquement */}
+      <div className="md:hidden bg-gradient-to-br from-accent to-accent-dark px-6 pt-12 pb-6 sticky top-0 z-20">
         <div className="flex items-center gap-4">
           <button
             onClick={onBack}
@@ -42,6 +42,11 @@ const [tenantCount, setTenantCount] = useState(() => loadTenants().length);
           </button>
           <h1 className="text-white text-2xl font-bold">Paramètres</h1>
         </div>
+      </div>
+
+      {/* Titre PC uniquement */}
+      <div className="hidden md:block px-8 pt-8 pb-4">
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Paramètres</h1>
       </div>
 
       <div className="px-5 pt-5 pb-10">

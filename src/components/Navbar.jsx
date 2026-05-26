@@ -27,9 +27,10 @@ export default function Navbar({ activePage, onNavigate, hidden }) {
                 <button
                   key={key}
                   onClick={() => onNavigate('add')}
-                  className="relative -top-5 bg-gradient-to-br from-accent to-accent-dark text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-200"
+                  className="relative -top-6 bg-gradient-to-br from-accent to-accent-dark text-white rounded-full w-16 h-16 flex items-center justify-center shadow-xl hover:scale-110 transition-transform duration-200 flex-shrink-0"
+                  style={{ minWidth: '64px', minHeight: '64px' }}
                 >
-                  <Icon size={28} />
+                  <Icon size={30} />
                 </button>
               );
             }

@@ -82,7 +82,9 @@ export default function Notifications({ onBack }) {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="bg-gradient-to-br from-accent to-accent-dark px-6 pt-12 pb-6 sticky top-0 z-20">
+      
+      {/* Header avec bouton retour — mobile uniquement */}
+      <div className="md:hidden bg-gradient-to-br from-accent to-accent-dark px-6 pt-12 pb-6 sticky top-0 z-20">
         <div className="flex items-center gap-4 mb-2">
           <button
             onClick={onBack}
@@ -90,8 +92,10 @@ export default function Notifications({ onBack }) {
           >
             <ArrowLeft size={20} className="text-white" />
           </button>
+
           <h1 className="text-white text-2xl font-bold">Notifications</h1>
         </div>
+        
         {totalAlerts > 0 && (
           <p className="text-white/70 text-sm font-semibold">
             {totalAlerts} alerte{totalAlerts > 1 ? 's' : ''} en attente
@@ -99,6 +103,17 @@ export default function Notifications({ onBack }) {
         )}
       </div>
 
+      {/* Titre PC uniquement */}
+      <div className="hidden md:block px-8 pt-8 pb-4">
+      <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Alertes</h1>
+      {totalAlerts > 0 && (
+        <p className="text-gray-400 text-sm mt-1">
+          {totalAlerts} alerte{totalAlerts > 1 ? 's' : ''} en attente
+        </p>
+      )}
+    </div>
+
+      {/* Contenu principal avec chevauchement */}
       <div className="px-5 pt-5">
         {expired.length === 0 && expiringSoon.length === 0 && upcoming.length === 0 ? (
           <div className="text-center py-16">

@@ -350,7 +350,7 @@ const [supportOpen, setSupportOpen] = useState(false); */}
     
                 <Heart size={22} fill="currentColor" />
             </button>
-        </div> */}
+        </div> ===== */}
 
     </div>
   );
