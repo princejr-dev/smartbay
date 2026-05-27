@@ -1,12 +1,11 @@
-import { Home, Users, Bell, Settings, FileText } from 'lucide-react';
+import { Home, Users, Bell, Settings, FileText, LogOut } from 'lucide-react';
 
-export default function Sidebar({ activePage, onNavigate }) {
+export default function Sidebar({ activePage, onNavigate, onLogout }) {
   const navItems = [
     { key: 'dashboard', icon: Home, label: 'Dashboard' },
     { key: 'tenants', icon: Users, label: 'Locataires' },
-    { key: 'notifications', icon: Bell, label: 'Alertes' },
     { key: 'receipts', icon: FileText, label: 'Reçus' },
-    { key: 'settings', icon: Settings, label: 'Paramètres' },
+    { key: 'notifications', icon: Bell, label: 'Alertes' },
   ];
 
   return (
@@ -14,11 +13,11 @@ export default function Sidebar({ activePage, onNavigate }) {
 
       {/* Logo */}
       <div className="flex items-center gap-3 px-6 py-6 border-b border-gray-100 dark:border-gray-700">
-        <img src="/favicon.png" alt="SmartBay" className="w-8 h-8 rounded" />
+        <img src="/favicon.png" alt="SmartBay" className="w-8 h-8" />
         <span className="font-audiowide font-bold text-accent text-lg">SmartBay</span>
       </div>
 
-      {/* Navigation */}
+      {/* Navigation principale */}
       <nav className="flex-1 px-4 py-6 flex flex-col gap-1">
         {navItems.map(({ key, icon: Icon, label }) => {
           const isActive = activePage === key;
@@ -39,10 +38,32 @@ export default function Sidebar({ activePage, onNavigate }) {
         })}
       </nav>
 
-      {/* Footer sidebar */}
-      <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-700">
-        <p className="text-xs text-gray-400">SmartBay v.0.3.0</p>
-        <p className="text-xs text-gray-400">Gestion locative</p>
+      {/* Footer sidebar — Paramètres + Déconnexion */}
+      <div className="px-4 pb-6 flex flex-col gap-1 border-t border-gray-100 dark:border-gray-700 pt-4">
+        {/* Paramètres */}
+        <button
+          onClick={() => onNavigate('settings')}
+          className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 w-full text-left
+            ${activePage === 'settings'
+              ? 'bg-gradient-to-r from-accent to-accent-dark text-white shadow-md shadow-accent/30'
+              : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-accent'
+            }`}
+        >
+          <Settings size={18} />
+          Paramètres
+        </button>
+
+        {/* Déconnexion */}
+        <button
+          onClick={onLogout}
+          className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 w-full text-left text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+        >
+          <LogOut size={18} />
+          Se déconnecter
+        </button>
+
+        {/* Version */}
+        <p className="text-xs text-gray-400 px-4 mt-2">SmartBay v0.4.0</p>
       </div>
     </aside>
   );

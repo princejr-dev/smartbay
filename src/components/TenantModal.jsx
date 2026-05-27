@@ -29,9 +29,18 @@ export default function TenantModal({ visible, tenant, onSave, onClose }) {
   const [advance, setAdvance] = useState(initial.advance);
   const [error, setError] = useState('');
 
-  // Calcul automatique du reste
-  const reste = advance && rent
-    ? Math.max(0, parseInt(rent || 0) - parseInt(advance || 0))
+  // Calcul automatique du total
+const total = rent && (duration || customDuration)
+  ? parseInt(rent || 0) *
+    (duration === 0
+      ? (parseInt(customDuration) || 1)
+      : duration)
+  : '';
+
+// Calcul automatique du reste
+const reste =
+  total > 0
+    ? Math.max(0, total - parseInt(advance || 0))
     : null;
 
   const handleSave = () => {
@@ -60,7 +69,7 @@ export default function TenantModal({ visible, tenant, onSave, onClose }) {
       startDate,
       endDate,
       advance: advanceAmount,
-      reste: advanceAmount > 0 ? Math.max(0, parseInt(rent) - advanceAmount) : 0,
+      reste: Math.max(0, total - advanceAmount),
       receiptCount: tenant?.receiptCount || 1,
     });
   };
@@ -182,6 +191,21 @@ export default function TenantModal({ visible, tenant, onSave, onClose }) {
           >
             Autre
           </button>
+        </div>
+
+        {/* Total à payer */}
+        <label className="block text-sm text-gray-500 dark:text-gray-400 mb-2">
+          Total à payer <span className="text-xs">(calculé automatiquement)</span>
+        </label>
+        <div className="flex items-center gap-3 border-2 border-accent dark:border-accent rounded-xl px-4 mb-4">
+          <Wallet size={18} className="text-accent flex-shrink-0" />
+          <input
+            type="number"
+            placeholder="Montant total"
+            value={total}
+            readOnly
+            className="flex-1 py-3 bg-transparent outline-none font-bold text-accent dark:text-white placeholder-gray-400"
+          />
         </div>
 
         {/* Champ durée personnalisée */}

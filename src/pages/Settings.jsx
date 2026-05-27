@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { ArrowLeft, Moon, Bell, Server, Info, Trash2, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Moon, Bell, Server, Info, Trash2, ChevronRight, LogOut } from 'lucide-react';
 import { loadSettings, saveSettings, loadTenants, clearAll } from '../utils/storage';
 
-export default function Settings({ onBack, onThemeChange }) {
+export default function Settings({ onBack, onThemeChange, onLogout }) {
   // Initialisation lazy — chargé une seule fois au montage
 const [settings, setSettings] = useState(() => loadSettings());
 const [tenantCount, setTenantCount] = useState(() => loadTenants().length);
@@ -172,9 +172,19 @@ const [tenantCount, setTenantCount] = useState(() => loadTenants().length);
               </div>
               <p className="font-semibold text-gray-800 dark:text-white text-sm">Version</p>
             </div>
-            <span className="text-gray-400 text-sm">0.3.0</span>
+            <span className="text-gray-400 text-sm">0.4.0</span>
           </div>
         </div>
+
+        {/* Déconnexion */}
+<button
+  onClick={onLogout}
+  className="w-full flex items-center justify-center gap-3 bg-red-50 dark:bg-red-900/20 text-red-500 py-4 rounded-2xl font-semibold hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors mt-2"
+>
+  <LogOut size={18} />
+  Se déconnecter
+</button>
+
       </div>
     </div>
   );

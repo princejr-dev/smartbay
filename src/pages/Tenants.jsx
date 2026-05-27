@@ -74,7 +74,7 @@ export default function Tenants({ onBack, modalOpen, onModalClose }) {
 
       showToast(
        <span className="flex items-center justify-center gap-2">
-        <Trash2 className='text-red-600 dark:bg-red-900/20' size={16} /> Suppression réussie !
+        <Trash2 size={16} /> Suppression réussie !
        </span> );
     }
   };

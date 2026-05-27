@@ -161,19 +161,28 @@ export function generateReceipt(tenant) {
       <span class="row-label">Locataire</span>
       <span class="row-value">${tenant.civility} ${tenant.name}</span>
     </div>
+    
     ${tenant.phone ? `
     <div class="row">
       <span class="row-label">Téléphone</span>
       <span class="row-value">${tenant.phone}</span>
     </div>` : ''}
+
+    <div class="row">
+      <span class="row-label">Loyer mensuel</span>
+      <span class="row-value">${tenant.rent.toLocaleString()} FCFA</span>
+    </div>
+    
     <div class="row">
       <span class="row-label">Durée de location</span>
       <span class="row-value">${tenant.duration} mois</span>
     </div>
+
     <div class="row">
       <span class="row-label">Date d'entrée</span>
       <span class="row-value">${formatDateLong(tenant.startDate)}</span>
     </div>
+
     <div class="row">
       <span class="row-label">Date d'expiration</span>
       <span class="row-value">${formatDateLong(tenant.endDate)}</span>
@@ -191,10 +200,12 @@ export function generateReceipt(tenant) {
       <span>Loyer total</span>
       <span>${totalAmount.toLocaleString()} FCFA</span>
     </div>
+
     <div class="advance-row">
       <span>Avance versée</span>
       <span>${tenant.advance.toLocaleString()} FCFA</span>
     </div>
+
     <div class="advance-row">
       <span>Reste à payer</span>
       <span class="reste">${tenant.reste.toLocaleString()} FCFA</span>
@@ -206,6 +217,7 @@ export function generateReceipt(tenant) {
       <strong>Fait à :</strong> Douala<br>
       <strong>Le :</strong> ${formatDateLong(today)}
     </div>
+    
     <div class="signature-box">
       <div class="signature-label">Signature du propriétaire</div>
       <div class="signature-line">Le bailleur</div>

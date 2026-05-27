@@ -43,13 +43,15 @@ function TenantsTable({ tenants, onEdit, onDelete, onReceipt }) {
       <thead>
         <tr className="bg-gray-50 dark:bg-gray-700/50">
           <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Locataire</th>
-          <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Loyer</th>
+          <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Loyer mensuel</th>
           <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Durée</th>
+          <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Total</th>
           <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Expiration</th>
           <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Statut</th>
           <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Actions</th>
         </tr>
       </thead>
+
       <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
         {tenants.map(tenant => {
           const days = getDaysUntilExpiry(tenant.endDate);
@@ -58,11 +60,13 @@ function TenantsTable({ tenants, onEdit, onDelete, onReceipt }) {
 
           return (
             <tr key={tenant.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+              
               <td className="px-6 py-4">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-xl bg-accent/10 flex items-center justify-center flex-shrink-0">
                     <Users size={16} className="text-accent" />
                   </div>
+
                   <div>
                     <p className="font-semibold text-gray-800 dark:text-white text-sm">
                       {tenant.civility} {tenant.name}
@@ -71,24 +75,35 @@ function TenantsTable({ tenants, onEdit, onDelete, onReceipt }) {
                   </div>
                 </div>
               </td>
+
               <td className="px-6 py-4">
                 <p className="font-semibold text-accent text-sm">{formatNumber(tenant.rent)} FCFA</p>
                 {tenant.advance > 0 && (
                   <p className="text-xs text-gray-400">Avance: {formatNumber(tenant.advance)}</p>
                 )}
+                {tenant.advance > 0 && tenant.reste > 0 && (
+                  <p className="text-xs text-gray-400">Reste: {formatNumber(tenant.reste)}</p>
+                )}
               </td>
+
               <td className="px-6 py-4">
                 <p className="text-sm text-gray-600 dark:text-gray-300">{tenant.duration} mois</p>
                 <p className="text-xs text-gray-400">{formatDate(tenant.startDate)}</p>
               </td>
+
+              <td className="px-6 py-4">
+                <p className="font-semibold text-accent text-sm">{formatNumber(tenant.rent * tenant.duration)} FCFA</p>
+              </td>
+
               <td className="px-6 py-4">
                 <p className={`text-sm font-medium ${isExpired ? 'text-red-500' : isSoon ? 'text-orange-500' : 'text-gray-600 dark:text-gray-300'}`}>
                   {formatDate(tenant.endDate)}
                 </p>
                 <p className={`text-xs ${isExpired ? 'text-red-400' : isSoon ? 'text-orange-400' : 'text-gray-400'}`}>
-                  {isExpired ? `${Math.abs(days)} jours de retard` : `${days} jours restants`}
+                  {isExpired ? `${Math.abs(days)} ${Math.abs(days) <= 1 ? 'jour de retard' : 'jours de retard'}` : `${Math.abs(days)} ${Math.abs(days) <= 1 ? 'jour restant' : 'jours restants'}`}
                 </p>
               </td>
+
               <td className="px-6 py-4">
                 <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold
                   ${isExpired ? 'bg-red-50 dark:bg-red-900/20 text-red-500'
@@ -97,6 +112,7 @@ function TenantsTable({ tenants, onEdit, onDelete, onReceipt }) {
                   {isExpired ? 'Expiré' : isSoon ? 'Bientôt' : 'Actif'}
                 </span>
               </td>
+
               <td className="px-6 py-4">
                 <div className="flex items-center gap-2">
                   <button onClick={() => onReceipt(tenant)} className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center hover:bg-blue-100 transition-colors" title="Reçu">
@@ -158,7 +174,7 @@ export default function PCDashboard({ searchTerm, activePage }) {
       
       showToast(
         <span className="flex items-center justify-center gap-2">
-          <Trash2 className="text-red-600 dark:bg-red-900/20" size={16} /> Suppression réussie !
+          <Trash2 size={16} /> Suppression réussie !
         </span>
       );
     }
@@ -242,7 +258,7 @@ export default function PCDashboard({ searchTerm, activePage }) {
         {[
           { label: 'Total locataires', value: tenants.length, icon: Users, color: 'bg-accent/10 text-accent', trend: null },
           { label: 'Locataires actifs', value: active.length, icon: CheckCircle, color: 'bg-green-50 dark:bg-green-900/20 text-green-500', trend: null },
-          { label: 'Revenus ce mois', value: `${formatNumber(totalRevenue)} FCFA`, icon: TrendingUp, color: 'bg-blue-50 dark:bg-blue-900/20 text-blue-500', trend: '+12%' },
+          { label: 'Revenus mensuels', value: `${formatNumber(totalRevenue)} FCFA`, icon: TrendingUp, color: 'bg-blue-50 dark:bg-blue-900/20 text-blue-500', trend: '+12%' },
           { label: 'Alertes', value: expired.length + expiringSoon.length, icon: AlertCircle, color: 'bg-red-50 dark:bg-red-900/20 text-red-500', trend: null },
         ].map(({ label, value, icon: Icon, color, trend }) => (
           <div key={label} className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm">
