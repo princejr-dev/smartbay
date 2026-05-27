@@ -1,4 +1,5 @@
 import { Home, Users, Bell, Settings, FileText, LogOut } from 'lucide-react';
+import { useState } from 'react';
 
 export default function Sidebar({ activePage, onNavigate, onLogout }) {
   const navItems = [
@@ -7,6 +8,8 @@ export default function Sidebar({ activePage, onNavigate, onLogout }) {
     { key: 'receipts', icon: FileText, label: 'Reçus' },
     { key: 'notifications', icon: Bell, label: 'Alertes' },
   ];
+
+  const [showLogout, setShowLogout] = useState(false);
 
   return (
     <aside className="hidden md:flex flex-col fixed left-0 top-0 h-full w-60 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 z-40">
@@ -55,12 +58,38 @@ export default function Sidebar({ activePage, onNavigate, onLogout }) {
 
         {/* Déconnexion */}
         <button
-          onClick={onLogout}
+          onClick={() => setShowLogout(true)}
           className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 w-full text-left text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
         >
           <LogOut size={18} />
           Se déconnecter
         </button>
+        {showLogout && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+              <p className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                Êtes-vous sûr de vouloir vous déconnecter ?
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowLogout(false)}
+                  className="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={() => {
+                    setShowLogout(false);
+                    onLogout();
+                  }}
+                  className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                >
+                  Se déconnecter
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Version */}
         <p className="text-xs text-gray-400 px-4 mt-2">SmartBay v0.4.0</p>

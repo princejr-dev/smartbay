@@ -28,6 +28,8 @@ const [tenantCount, setTenantCount] = useState(() => loadTenants().length);
     }
   };
 
+  const [showLogout, setShowLogout] = useState(false);
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
 
@@ -178,12 +180,39 @@ const [tenantCount, setTenantCount] = useState(() => loadTenants().length);
 
         {/* Déconnexion */}
 <button
-  onClick={onLogout}
-  className="w-full flex items-center justify-center gap-3 bg-red-50 dark:bg-red-900/20 text-red-500 py-4 rounded-2xl font-semibold hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors mt-2"
->
-  <LogOut size={18} />
-  Se déconnecter
+          onClick={() => setShowLogout(true)}
+          className="w-full flex items-center justify-center gap-3 bg-red-50 dark:bg-red-900/20 text-red-500 py-4 rounded-2xl font-semibold hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors mt-2"
+        >
+          <LogOut size={18} />
+          Se déconnecter
 </button>
+{showLogout && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+              <p className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                Êtes-vous sûr de vouloir vous déconnecter ?
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowLogout(false)}
+                  className="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={() => {
+                    setShowLogout(false);
+                    onLogout();
+                  }}
+                  className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                >
+                  Se déconnecter
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
 
       </div>
     </div>
