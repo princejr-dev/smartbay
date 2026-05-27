@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { ArrowLeft, Moon, Bell, Server, Info, Trash2, ChevronRight, LogOut } from 'lucide-react';
 import { loadSettings, saveSettings, loadTenants, clearAll } from '../utils/storage';
+import { auth } from '../firebase';
 
 export default function Settings({ onBack, onThemeChange, onLogout }) {
   // Initialisation lazy — chargé une seule fois au montage
 const [settings, setSettings] = useState(() => loadSettings());
 const [tenantCount, setTenantCount] = useState(() => loadTenants().length);
+const user = auth.currentUser;
 
   // Met à jour un paramètre et sauvegarde
   const update = (key, value) => {
@@ -52,6 +54,34 @@ const [tenantCount, setTenantCount] = useState(() => loadTenants().length);
       </div>
 
       <div className="px-5 pt-5 pb-10">
+        
+        {/* Profil */}
+<p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 ml-1">Profil</p>
+<div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm mb-5 overflow-hidden">
+  <div className="bg-gradient-to-br from-accent to-accent-dark p-5">
+    <div className="flex items-center gap-4">
+      <div className="w-14 h-14 rounded-2xl bg-white/20 border-2 border-white/40 flex items-center justify-center flex-shrink-0">
+        <span className="text-white text-xl font-bold">
+          {user?.displayName ? user.displayName[0].toUpperCase() : 'P'}
+        </span>
+      </div>
+      <div>
+        <p className="text-white font-bold text-base">
+          {user?.displayName || 'Propriétaire'}
+        </p>
+        <p className="text-white/70 text-sm mt-0.5">{user?.email}</p>
+        <p className="text-white/50 text-xs mt-1">
+          Membre depuis{' '}
+          {user?.metadata?.creationTime
+            ? new Date(user.metadata.creationTime).toLocaleDateString('fr-FR', {
+                day: 'numeric', month: 'long', year: 'numeric'
+              })
+            : '—'}
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
 
         {/* Apparence */}
         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 ml-1">Apparence</p>
