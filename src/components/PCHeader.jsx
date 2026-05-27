@@ -6,6 +6,7 @@ import { getDaysUntilExpiry } from '../utils/helpers';
 export default function PCHeader({ onNavigate, theme, onThemeChange, searchTerm, onSearch, user, onLogout }) {
   const tenants = loadTenants();
   const alertCount = tenants.filter(t => getDaysUntilExpiry(t.endDate) <= 7).length;
+  const [showLogout, setShowLogout] = useState(false);
 
   // État du dropdown profil
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -160,22 +161,63 @@ export default function PCHeader({ onNavigate, theme, onThemeChange, searchTerm,
                   </div>
                 </div>
 
-                {/* Séparateur */}
+                                {/* Séparateur */}
                 <div className="h-px bg-gray-100 dark:bg-gray-700" />
 
                 {/* Bouton déconnexion */}
                 <button
-                  onClick={() => { setDropdownOpen(false); onLogout(); }}
-                  className="w-full flex items-center justify-center gap-2 bg-red-50 dark:bg-red-900/20 text-red-500 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition-colors"
+                  onClick={() => {
+                    setDropdownOpen(false);
+                    setShowLogout(true);
+                  }}
+                  className="w-full flex items-center justify-center gap-2 bg-red-50 dark:bg-red-900/20 text-red-500 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
                 >
                   <LogOut size={15} />
                   Se déconnecter
                 </button>
+
               </div>
             </div>
           )}
         </div>
       </div>
+
+      {/* Modal confirmation logout */}
+      {showLogout && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
+
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-xl w-full max-w-sm">
+
+            <p className="text-base font-semibold text-gray-900 dark:text-white mb-5">
+              Êtes-vous sûr de vouloir vous déconnecter ?
+            </p>
+
+            <div className="flex gap-3 text-center">
+
+              <button
+                onClick={() => setShowLogout(false)}
+                className="flex-1 py-2.5 rounded-xl bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+              >
+                Annuler
+              </button>
+
+              <button
+                onClick={() => {
+                  setShowLogout(false);
+                  onLogout();
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-red-500 text-white hover:bg-red-600 transition-colors"
+              >
+                Déconnexion
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+      )}
+
     </header>
   );
 }
