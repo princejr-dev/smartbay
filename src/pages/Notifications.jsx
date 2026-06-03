@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { ArrowLeft, AlertCircle, Clock, Calendar, CheckCircle } from 'lucide-react';
-import { loadTenants } from '../utils/storage';
+import { useState, useEffect } from 'react';
+import { ArrowLeft, AlertCircle, Clock, Calendar, CheckCircle2 } from 'lucide-react';
+import { fetchTenants } from '../utils/firestore';
 import { formatDate, formatNumber, getDaysUntilExpiry } from '../utils/helpers';
 
 // Carte de notification individuelle — définie en dehors du composant
@@ -65,8 +65,23 @@ function Section({ title, icon: Icon, color, items, type }) {
   );
 }
 
-export default function Notifications({ onBack }) {
-  const [tenants] = useState(() => loadTenants());
+export default function Notifications({ onBack, user }) {
+  const [tenants, setTenants] = useState([]);
+
+  // Charge les locataires au montage
+  useEffect(() => {
+    const load = async () => {
+      if (!user) return;
+
+      try {
+        const data = await fetchTenants(user.uid);
+        setTenants(data);
+      } catch (err) {
+        console.error('Erreur chargement notifications:', err);
+      }
+    };
+    load();
+  }, [user]);
 
   const expired = tenants.filter(t => getDaysUntilExpiry(t.endDate) < 0);
   const expiringSoon = tenants.filter(t => {
@@ -118,7 +133,7 @@ export default function Notifications({ onBack }) {
         {expired.length === 0 && expiringSoon.length === 0 && upcoming.length === 0 ? (
           <div className="text-center py-16">
             <div className="w-16 h-16 rounded-2xl bg-green-50 dark:bg-green-900/20 flex items-center justify-center mx-auto mb-4">
-              <CheckCircle size={36} className="text-green-500" />
+              <CheckCircle2 size={36} className="text-green-500" />
             </div>
             <p className="font-bold text-gray-700 dark:text-white text-lg mb-2">Tout est à jour !</p>
             <p className="text-gray-400 text-sm">Aucune alerte pour le moment.</p>

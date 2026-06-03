@@ -28,6 +28,7 @@ export default function TenantModal({ visible, tenant, onSave, onClose }) {
   const [startDate, setStartDate] = useState(initial.startDate);
   const [advance, setAdvance] = useState(initial.advance);
   const [error, setError] = useState('');
+  const [isRenewal, setIsRenewal] = useState(false);
 
   // Calcul automatique du total
 const total = rent && (duration || customDuration)
@@ -43,36 +44,42 @@ const reste =
     ? Math.max(0, total - parseInt(advance || 0))
     : null;
 
-  const handleSave = () => {
-    // Validation des champs obligatoires
-    if (!name.trim()) { setError('Le nom est obligatoire.'); return; }
-    if (!rent || isNaN(rent)) { setError('Le loyer est obligatoire.'); return; }
-    if (!startDate) { setError('La date de début est obligatoire.'); return; }
+// Sauvegarde du locataire
+const handleSave = () => {
+  if (!name.trim()) { setError('Le nom est obligatoire.'); return; }
+  if (!rent || isNaN(rent)) { setError('Le loyer est obligatoire.'); return; }
+  if (!startDate) { setError('La date de début est obligatoire.'); return; }
 
-    // Durée finale : bouton sélectionné ou champ personnalisé
-    const finalDuration = duration === 0
-      ? parseInt(customDuration) || 1
-      : duration;
+  const finalDuration = duration === 0 ? parseInt(customDuration) || 1 : duration;
+  if (finalDuration < 1) { setError('La durée doit être au moins 1 mois.'); return; }
 
-    if (finalDuration < 1) { setError('La durée doit être au moins 1 mois.'); return; }
+  const endDate = computeEndDate(startDate, finalDuration);
+  const advanceAmount = advance ? parseInt(advance) : 0;
+  const rentAmount = parseInt(rent);
 
-    const endDate = computeEndDate(startDate, finalDuration);
-    const advanceAmount = advance ? parseInt(advance) : 0;
-
-    onSave({
-      id: tenant ? tenant.id : Date.now(),
-      civility,
-      name: name.trim(),
-      phone: phone.trim(),
-      rent: parseInt(rent),
-      duration: finalDuration,
-      startDate,
-      endDate,
-      advance: advanceAmount,
-      reste: Math.max(0, total - advanceAmount),
-      receiptCount: tenant?.receiptCount || 1,
-    });
+  const data = {
+    civility,
+    name: name.trim(),
+    phone: phone.trim(),
+    rent: rentAmount,
+    duration: finalDuration,
+    startDate,
+    endDate,
+    advance: advanceAmount,
+    reste: Math.max(0, (rentAmount * finalDuration) - advanceAmount),
+    // Si renouvellement → incrémente, sinon garde le compteur existant
+    receiptCount: isRenewal
+      ? (tenant?.receiptCount || 1) + 1
+      : (tenant?.receiptCount || 1),
   };
+
+  // Ajoute l'id uniquement si modification (id Firestore = string)
+  if (tenant?.id && typeof tenant.id === 'string') {
+    data.id = tenant.id;
+  }
+
+  onSave(data);
+};
 
   if (!visible) return null;
 
@@ -258,6 +265,27 @@ const reste =
             </span>
           </div>
         )}
+
+        {/* Bouton renouvellement — visible uniquement en modification */}
+{tenant?.id && (
+  <div className="bg-accent/10 border border-accent/30 rounded-xl p-3 mb-3">
+    <p className="text-xs text-accent font-semibold mb-2">
+      Renouvellement de location
+    </p>
+    <p className="text-xs text-gray-400 mb-3">
+      Incrémente le numéro de reçu (actuellement N°{String(tenant?.receiptCount || 1).padStart(3, '0')})
+    </p>
+    <button
+      onClick={() => {
+        setIsRenewal(true);
+        handleSave();
+      }}
+      className="w-full py-2 rounded-xl bg-accent text-white text-sm font-semibold hover:opacity-90 transition-all"
+    >
+      Renouveler le contrat → N°{String((tenant?.receiptCount || 1) + 1).padStart(3, '0')}
+    </button>
+  </div>
+)}
 
         {/* Boutons */}
         <div className="flex gap-3 mt-2">

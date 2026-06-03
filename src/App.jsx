@@ -11,22 +11,28 @@ import Dashboard from './pages/Dashboard';
 import Tenants from './pages/Tenants';
 import Notifications from './pages/Notifications';
 import Settings from './pages/Settings';
-import { loadSettings, saveSettings } from './utils/storage';
 import { onAuthChange, logout } from './utils/auth';
-
-// Initialise le thème avant le premier rendu
-const initialSettings = loadSettings();
-const initialTheme = initialSettings.theme || 'light';
-if (initialTheme === 'dark') {
-  document.documentElement.classList.add('dark');
-}
+import TenantFolder from './pages/TenantFolder';
+import TenantFolderDetail from './pages/TenantFolderDetail';
+import { loadSettings, saveSettings  } from './utils/storage';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfService from './pages/TermsOfService';
+import UpdateBanner from './components/UpdateBanner';
 
 export default function App() {
   const [activePage, setActivePage] = useState('dashboard');
-  const [theme, setTheme] = useState(initialTheme);
   const [modalOpen, setModalOpen] = useState(false);
   const [showLanding, setShowLanding] = useState(false);
   const [pcSearchTerm, setPcSearchTerm] = useState('');
+  const [selectedTenant, setSelectedTenant] = useState(null);
+  const [legalPage, setLegalPage] = useState(null);
+  
+  // Charge les paramètres initiaux (thème, notifications, rappel)
+  const initialSettings = loadSettings();
+  const initialTheme = initialSettings.theme || 'light';
+
+  // Thème global de l'app (light/dark)
+  const [theme, setTheme] = useState(initialTheme);
 
   // État utilisateur Firebase
   const [user, setUser] = useState(null);
@@ -50,24 +56,30 @@ export default function App() {
 
   // Applique le thème dark/light
   useEffect(() => {
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [theme]);
+  if (theme === 'dark') {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
+}, [theme]);
 
   // Reset le scroll en haut à chaque changement de page
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [activePage]);
 
+
   // Sauvegarde le thème
   const handleThemeChange = (newTheme) => {
-    setTheme(newTheme);
-    const settings = loadSettings();
-    saveSettings({ ...settings, theme: newTheme });
-  };
+  setTheme(newTheme);
+
+  const settings = loadSettings();
+
+  saveSettings({
+    ...settings,
+    theme: newTheme,
+  });
+};
 
   // Entrée dans l'app depuis la landing
   const handleEnterApp = () => {
@@ -111,7 +123,7 @@ export default function App() {
           />
         );
       case 'notifications':
-        return <Notifications onBack={() => setActivePage('dashboard')} />;
+        return <Notifications onBack={() => setActivePage('dashboard')} user={user} />;
       case 'settings':
         return (
           <Settings
@@ -128,32 +140,57 @@ export default function App() {
 
   // Pages PC
   const renderPCPage = () => {
-    switch (activePage) {
-      case 'notifications':
-        return <Notifications onBack={() => setActivePage('dashboard')} />;
-      case 'settings':
-        return (
-          <Settings
-            onBack={() => setActivePage('dashboard')}
-            onThemeChange={handleThemeChange}
-            onLogout={handleLogout}
-            user={user}
-          />
-        );
-      case 'receipts':
-        return <PCReceipts user={user} />;
-      default:
-        return <PCDashboard searchTerm={pcSearchTerm} activePage={activePage} user={user} />;
-    }
-  };
+  // Page détail dossier — prioritaire sur tout
+  if (selectedTenant && activePage === 'folders') {
+    return (
+      <TenantFolderDetail
+        tenant={selectedTenant}
+        user={user}
+        onBack={() => setSelectedTenant(null)}
+      />
+    );
+  }
+
+  switch (activePage) {
+    case 'notifications':
+      return <Notifications onBack={() => setActivePage('dashboard')} user={user} />;
+    case 'settings':
+      return (
+        <Settings
+          onBack={() => setActivePage('dashboard')}
+          onThemeChange={handleThemeChange}
+          onLogout={handleLogout}
+          user={user}
+        />
+      );
+    case 'receipts':
+      return <PCReceipts user={user} />;
+    case 'folders':
+      return (
+        <TenantFolder
+          user={user}
+          onOpenDetail={(tenant) => setSelectedTenant(tenant)}
+        />
+      );
+    default:
+      return <PCDashboard searchTerm={pcSearchTerm} activePage={activePage} user={user} />;
+  }
+};
+
+// Page légale (CGU ou confidentialité)
+  if (legalPage === 'privacy') {
+    return <PrivacyPolicy onBack={() => setLegalPage(null)} />;
+  }
+  if (legalPage === 'terms') {
+    return <TermsOfService onBack={() => setLegalPage(null)} />;
+  }
 
   // Chargement Firebase en cours
   if (authLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-accent to-accent-dark flex items-center justify-center">
         <div className="text-center">
-          <img src="/favicon.png" alt="SmartBay" className="w-16 h-16 mx-auto mb-4 animate-pulse" />
-          <p className="font-audiowide text-white text-xl">SmartBay</p>
+          <img src="/favicon.png" alt="SmartBay" className="w-16 h-16 mx-auto mb-4 animate-pulse rounded" />
         </div>
       </div>
     );
@@ -161,7 +198,7 @@ export default function App() {
 
   // Landing page
   if (showLanding) {
-    return <Landing onEnterApp={handleEnterApp} />;
+    return <Landing onEnterApp={handleEnterApp} onNavigateLegal={setLegalPage} />;
   }
 
   // Auth — si non connecté
@@ -170,7 +207,7 @@ export default function App() {
       <div className="min-h-screen">
         {authPage === 'login'
           ? <Login onNavigate={setAuthPage} />
-          : <Register onNavigate={setAuthPage} />
+          : <Register onNavigate={setAuthPage} onNavigateLegal={setLegalPage} />
         }
       </div>
     );
@@ -179,6 +216,9 @@ export default function App() {
   // App principale — connecté
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
+
+      {/* Bannière mise à jour */}
+      <UpdateBanner />
 
       {/* ===== VERSION PC ===== */}
       <div className="hidden md:flex">
@@ -209,6 +249,7 @@ export default function App() {
             activePage={activePage}
             onNavigate={handleNavigate}
             hidden={modalOpen}
+            user={user}
           />
         )}
       </div>

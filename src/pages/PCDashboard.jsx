@@ -1,16 +1,17 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Users, TrendingUp, AlertCircle, CheckCircle,
-  Plus, FileText, Pencil, Trash2
+  Plus, FileText, Pencil, Trash2, XCircle,
+  CheckCircle2
 } from 'lucide-react';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer
 } from 'recharts';
-import { loadTenants, saveTenants } from '../utils/storage';
 import { formatNumber, formatDate, getDaysUntilExpiry } from '../utils/helpers';
 import { generateReceipt } from '../utils/receipt';
 import TenantModal from '../components/TenantModal';
+import { fetchTenants, addTenant, updateTenant, deleteTenant } from '../utils/firestore';
 
 function buildRevenueData(tenants) {
   const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin',
@@ -134,59 +135,103 @@ function TenantsTable({ tenants, onEdit, onDelete, onReceipt }) {
   );
 }
 
-export default function PCDashboard({ searchTerm, activePage }) {
-  const [tenants, setTenants] = useState(() => loadTenants());
+export default function PCDashboard({ searchTerm, activePage, user }) {
+  const [tenants, setTenants] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [editingTenant, setEditingTenant] = useState(null);
   const [toast, setToast] = useState('');
+
+  // Charge les locataires depuis Firestore à chaque changement de page
+useEffect(() => {
+  const load = async () => {
+    if (!user) return;
+    setLoading(true);
+    try {
+      const data = await fetchTenants(user.uid);
+      setTenants(data);
+    } catch (err) {
+      console.error('Erreur chargement:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  load();
+}, [user, activePage]);
 
   const showToast = (msg) => {
     setToast(msg);
     setTimeout(() => setToast(''), 3500);
   };
 
-  // Sauvegarde ou modification d'un locataire
-  const handleSave = (tenantData) => {
-    let updated;
-    const exists = tenants.find(t => t.id === tenantData.id);
-    if (exists) {
-      updated = tenants.map(t => t.id === tenantData.id ? tenantData : t);
-      showToast(`✅ Modifié avec succès !`);
-    } else {
-      updated = [...tenants, tenantData];
-      showToast(`✅ Ajouté avec succès !`);
-    }
-    setTenants(updated);
-    saveTenants(updated);
-    setModalVisible(false);
-    setEditingTenant(null);
-  };
-
-  // Supprime toutes les données avec confirmation
-  const handleDelete = (id) => {
-    const tenant = tenants.find(t => t.id === id);
-    const article = tenant.civility === 'Mme' ? 'la' : 'le';
-    
-    if (window.confirm(`Voulez-vous supprimer ${article} locataire ${tenant.civility} ${tenant.name} ?`)) {
-      const updated = tenants.filter(t => t.id !== id);
-      setTenants(updated);
-      saveTenants(updated);
-      
+  // Sauvegarde via Firestore
+const handleSave = async (tenantData) => {
+  try {
+    if (tenantData.id && typeof tenantData.id === 'string') {
+      // Modification — id Firestore existant (string)
+      await updateTenant(tenantData.id, tenantData);
+      setTenants(prev => prev.map(t => t.id === tenantData.id ? { ...t, ...tenantData } : t));
       showToast(
-        <span className="flex items-center justify-center gap-2">
-          <Trash2 size={16} /> Suppression réussie !
+        <span className="flex items-center justify-center gap-1">
+            <Pencil size={20} className="text-green-500 font-bold" />
+            Modifié avec succès !
         </span>
-      );
+          );
+    } else {
+      // Ajout — pas d'id ou id numérique → Firestore génère un id string
+      const saved = await addTenant(user.uid, tenantData);
+      setTenants(prev => [saved, ...prev]);
+      showToast(
+        <span className="flex items-center justify-center gap-1">
+            <CheckCircle2 size={20} className="text-green-500 font-bold" />
+            Ajouté avec succès !
+        </span>
+        );
     }
-  };
+  } catch (err) {
+    console.error('Erreur sauvegarde:', err);
+    showToast(
+      <span className="flex items-center justify-center gap-1">
+          <XCircle size={20} className="text-red-500 font-bold" />
+          Erreur lors de la sauvegarde.
+      </span>
+      );
+  }
+  setModalVisible(false);
+  setEditingTenant(null);
+};
 
+// Suppression via Firestore
+const handleDelete = async (id) => {
+  const tenant = tenants.find(t => t.id === id);
+  if (!tenant) return;
+  const article = tenant.civility === 'Mme' ? 'la' : 'le';
+  if (!window.confirm(`Voulez-vous supprimer ${article} locataire ${tenant.civility} ${tenant.name} ?`)) return;
+  try {
+    await deleteTenant(id);
+    setTenants(prev => prev.filter(t => t.id !== id));
+    showToast('🗑 Suppression réussie !');
+  } catch (err) {
+    console.error('Erreur suppression:', err);
+    showToast(
+      <span className="flex items-center justify-center gap-1">
+          <XCircle size={20} className="text-red-500 font-bold" />
+          Erreur lors de la suppression.
+      </span>
+    );
+  }
+};
+
+  // Génère le reçu et incrémente le compteur
   const handleReceipt = (tenant) => {
     generateReceipt(tenant);
-    const updated = tenants.map(t =>
-      t.id === tenant.id ? { ...t, receiptCount: (t.receiptCount || 1) + 1 } : t
-    );
-    setTenants(updated);
-    saveTenants(updated);
+    
+    showToast(
+      <span className="flex items-center justify-center gap-1">
+          <FileText size={20} />
+          Reçu généré !
+        </span>
+        );
   };
 
   const filtered = tenants.filter(t =>
@@ -209,7 +254,9 @@ export default function PCDashboard({ searchTerm, activePage }) {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Locataires</h1>
-            <p className="text-gray-400 text-sm mt-1">Vue d&#39;ensemble de vos locataires</p>
+            <p className="text-gray-400 text-sm mt-1">
+              {tenants.length} locataire{tenants.length > 1 ? 's' : ''} enregistré{tenants.length > 1 ? 's' : ''}
+            </p>
           </div>
           <button
             onClick={() => { setEditingTenant(null); setModalVisible(true); }}
@@ -220,14 +267,21 @@ export default function PCDashboard({ searchTerm, activePage }) {
           </button>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm overflow-hidden">
-          <TenantsTable
-            tenants={filtered}
-            onEdit={(t) => { setEditingTenant(t); setModalVisible(true); }}
-            onDelete={handleDelete}
-            onReceipt={handleReceipt}
-          />
-        </div>
+        {/* Loading */}
+        {loading ? (
+          <div className="flex justify-center py-24">
+            <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : (
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm overflow-hidden">
+            <TenantsTable
+              tenants={filtered}
+              onEdit={(t) => { setEditingTenant(t); setModalVisible(true); }}
+              onDelete={handleDelete}
+              onReceipt={handleReceipt}
+            />
+          </div>
+        )}
 
         {toast && (
           <div className="fixed bottom-8 right-8 bg-gray-900 dark:bg-gray-700 text-white py-3 px-5 rounded-xl shadow-xl z-50">
@@ -236,12 +290,12 @@ export default function PCDashboard({ searchTerm, activePage }) {
         )}
 
         <TenantModal
-          key={editingTenant?.id || 'new-' + modalVisible}
-          visible={modalVisible}
-          tenant={editingTenant}
-          onSave={handleSave}
-          onClose={() => { setModalVisible(false); setEditingTenant(null); }}
-        />
+  key={editingTenant ? `edit-${editingTenant.id}` : `new-${modalVisible}`}
+  visible={modalVisible}
+  tenant={editingTenant}
+  onSave={handleSave}
+  onClose={() => { setModalVisible(false); setEditingTenant(null); }}
+/>
       </div>
     );
   }
@@ -253,98 +307,103 @@ export default function PCDashboard({ searchTerm, activePage }) {
         <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Dashboard</h1>
       </div>
 
-      {/* Stats cards */}
-      <div className="grid grid-cols-4 gap-5 mb-8">
-        {[
-          { label: 'Total locataires', value: tenants.length, icon: Users, color: 'bg-accent/10 text-accent', trend: null },
-          { label: 'Locataires actifs', value: active.length, icon: CheckCircle, color: 'bg-green-50 dark:bg-green-900/20 text-green-500', trend: null },
-          { label: 'Revenus mensuels', value: `${formatNumber(totalRevenue)} FCFA`, icon: TrendingUp, color: 'bg-blue-50 dark:bg-blue-900/20 text-blue-500', trend: '+12%' },
-          { label: 'Alertes', value: expired.length + expiringSoon.length, icon: AlertCircle, color: 'bg-red-50 dark:bg-red-900/20 text-red-500', trend: null },
-        ].map(({ label, value, icon: Icon, color, trend }) => (
-          <div key={label} className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm">
-            <div className="flex items-start justify-between mb-3">
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${color}`}>
-                <Icon size={18} />
+      {loading ? (
+        <div className="flex justify-center py-24">
+          <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+        </div>
+      ) : (
+        <>
+          {/* Stats cards */}
+          <div className="grid grid-cols-4 gap-5 mb-8">
+            {[
+              { label: 'Total locataires', value: tenants.length, icon: Users, color: 'bg-accent/10 text-accent', trend: null },
+              { label: 'Locataires actifs', value: active.length, icon: CheckCircle, color: 'bg-green-50 dark:bg-green-900/20 text-green-500', trend: null },
+              { label: 'Revenus ce mois', value: `${formatNumber(totalRevenue)} FCFA`, icon: TrendingUp, color: 'bg-blue-50 dark:bg-blue-900/20 text-blue-500', trend: '+12%' },
+              { label: 'Alertes', value: expired.length + expiringSoon.length, icon: AlertCircle, color: 'bg-red-50 dark:bg-red-900/20 text-red-500', trend: null },
+            ].map(({ label, value, icon: Icon, color, trend }) => (
+              <div key={label} className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm">
+                <div className="flex items-start justify-between mb-3">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${color}`}>
+                    <Icon size={18} />
+                  </div>
+                  {trend && (
+                    <span className="text-xs font-semibold text-green-500 bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded-lg">
+                      {trend}
+                    </span>
+                  )}
+                </div>
+                <p className="text-2xl font-bold text-gray-800 dark:text-white">{value}</p>
+                <p className="text-xs text-gray-400 mt-1">{label}</p>
               </div>
-              {trend && (
-                <span className="text-xs font-semibold text-green-500 bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded-lg">
-                  {trend}
-                </span>
+            ))}
+          </div>
+
+          {/* Graphique + Alertes */}
+          <div className="grid grid-cols-3 gap-5 mb-8">
+            <div className="col-span-2 bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="font-bold text-gray-800 dark:text-white">Revenus</h2>
+                <span className="text-xs text-gray-400 bg-gray-50 dark:bg-gray-700 px-3 py-1.5 rounded-lg">6 derniers mois</span>
+              </div>
+              <ResponsiveContainer width="100%" height={200}>
+                <AreaChart data={revenueData}>
+                  <defs>
+                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#667eea" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#667eea" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 12, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '12px' }}
+                    formatter={(value) => [`${formatNumber(value)} FCFA`, 'Revenus']}
+                  />
+                  <Area type="monotone" dataKey="revenus" stroke="#667eea" strokeWidth={2.5} fill="url(#colorRevenue)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+              <h2 className="font-bold text-gray-800 dark:text-white mb-4">Alertes</h2>
+              {expired.length === 0 && expiringSoon.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-40 gap-3">
+                  <CheckCircle size={36} className="text-green-400" />
+                  <p className="text-sm text-gray-400 text-center">Aucune alerte</p>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-3 overflow-y-auto max-h-52">
+                  {[...expired.map(t => ({ t, type: 'expired' })), ...expiringSoon.map(t => ({ t, type: 'soon' }))].map(({ t, type }) => (
+                    <div key={t.id} className={`flex items-start gap-3 p-3 rounded-xl ${type === 'expired' ? 'bg-red-50 dark:bg-red-900/20' : 'bg-orange-50 dark:bg-orange-900/20'}`}>
+                      <AlertCircle size={16} className={`flex-shrink-0 mt-0.5 ${type === 'expired' ? 'text-red-500' : 'text-orange-500'}`} />
+                      <div>
+                        <p className="text-sm font-semibold text-gray-800 dark:text-white">{t.civility} {t.name}</p>
+                        <p className={`text-xs ${type === 'expired' ? 'text-red-500' : 'text-orange-500'}`}>
+                          {type === 'expired' ? `Expiré depuis ${Math.abs(getDaysUntilExpiry(t.endDate))}j` : `Expire dans ${getDaysUntilExpiry(t.endDate)}j`}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
-            <p className="text-2xl font-bold text-gray-800 dark:text-white">{value}</p>
-            <p className="text-xs text-gray-400 mt-1">{label}</p>
           </div>
-        ))}
-      </div>
 
-      {/* Graphique + Alertes */}
-      <div className="grid grid-cols-3 gap-5 mb-8">
-        <div className="col-span-2 bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="font-bold text-gray-800 dark:text-white">Revenus</h2>
-            <span className="text-xs text-gray-400 bg-gray-50 dark:bg-gray-700 px-3 py-1.5 rounded-lg">6 derniers mois</span>
+          {/* Tableau locataires récents */}
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+              <h2 className="font-bold text-gray-800 dark:text-white">Locataires récents</h2>
+            </div>
+            <TenantsTable
+              tenants={filtered.slice(0, 5)}
+              onEdit={(t) => { setEditingTenant(t); setModalVisible(true); }}
+              onDelete={handleDelete}
+              onReceipt={handleReceipt}
+            />
           </div>
-          <ResponsiveContainer width="100%" height={200}>
-            <AreaChart data={revenueData}>
-              <defs>
-                <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#667eea" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#667eea" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 12, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
-              <Tooltip
-                contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '12px' }}
-                formatter={(value) => [`${formatNumber(value)} FCFA`, 'Revenus']}
-              />
-              <Area type="monotone" dataKey="revenus" stroke="#667eea" strokeWidth={2.5} fill="url(#colorRevenue)" />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Alertes urgentes */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
-          <h2 className="font-bold text-gray-800 dark:text-white mb-4">Alertes</h2>
-          {expired.length === 0 && expiringSoon.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-40 gap-3">
-              <CheckCircle size={36} className="text-green-400" />
-              <p className="text-sm text-gray-400 text-center">Aucune alerte</p>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-3 overflow-y-auto max-h-52">
-              {[...expired.map(t => ({ t, type: 'expired' })), ...expiringSoon.map(t => ({ t, type: 'soon' }))].map(({ t, type }) => (
-                <div key={t.id} className={`flex items-start gap-3 p-3 rounded-xl ${type === 'expired' ? 'bg-red-50 dark:bg-red-900/20' : 'bg-orange-50 dark:bg-orange-900/20'}`}>
-                  <AlertCircle size={16} className={`flex-shrink-0 mt-0.5 ${type === 'expired' ? 'text-red-500' : 'text-orange-500'}`} />
-                  <div>
-                    <p className="text-sm font-semibold text-gray-800 dark:text-white">{t.civility} {t.name}</p>
-                    <p className={`text-xs ${type === 'expired' ? 'text-red-500' : 'text-orange-500'}`}>
-                      {type === 'expired' ? `Expiré depuis ${Math.abs(getDaysUntilExpiry(t.endDate))} jours` : `Expire dans ${getDaysUntilExpiry(t.endDate)} jours`}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Tableau locataires récents */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
-          <h2 className="font-bold text-gray-800 dark:text-white">
-            Locataires récents
-          </h2>
-        </div>
-        <TenantsTable
-          tenants={filtered.slice(0, 5)}
-          onEdit={(t) => { setEditingTenant(t); setModalVisible(true); }}
-          onDelete={handleDelete}
-          onReceipt={handleReceipt}
-        />
-      </div>
+        </>
+      )}
 
       {toast && (
         <div className="fixed bottom-8 right-8 bg-gray-900 dark:bg-gray-700 text-white py-3 px-5 rounded-xl shadow-xl z-50">
@@ -353,12 +412,12 @@ export default function PCDashboard({ searchTerm, activePage }) {
       )}
 
       <TenantModal
-        key={editingTenant?.id || 'new-' + modalVisible}
-        visible={modalVisible}
-        tenant={editingTenant}
-        onSave={handleSave}
-        onClose={() => { setModalVisible(false); setEditingTenant(null); }}
-      />
+  key={editingTenant ? `edit-${editingTenant.id}` : `new-${modalVisible}`}
+  visible={modalVisible}
+  tenant={editingTenant}
+  onSave={handleSave}
+  onClose={() => { setModalVisible(false); setEditingTenant(null); }}
+/>
     </div>
   );
 }

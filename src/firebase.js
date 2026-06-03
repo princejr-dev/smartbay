@@ -5,12 +5,12 @@ import { getFirestore } from 'firebase/firestore';
 
 // Configuration Firebase de SmartBay
 const firebaseConfig = {
-  apiKey: "AIzaSyCAwbNxkUhHHJfUklb-nqX4KpU-nWDBcBY",
-  authDomain: "smartbay-app.firebaseapp.com",
-  projectId: "smartbay-app",
-  storageBucket: "smartbay-app.firebasestorage.app",
-  messagingSenderId: "791541884041",
-  appId: "1:791541884041:web:505e9bcc35c981b82c1258"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUT_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_API_ID
 };
 
 // Initialise Firebase

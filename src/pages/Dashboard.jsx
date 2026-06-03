@@ -1,18 +1,27 @@
 import { useState, useEffect } from 'react';
-import { Users, AlertCircle, Clock, CheckCircle, ArrowRight } from 'lucide-react';
-import { loadTenants } from '../utils/storage';
+import { Users, AlertCircle, Clock, CheckCircle2, ArrowRight } from 'lucide-react';
+import { fetchTenants } from '../utils/firestore';
 import { formatNumber, getDaysUntilExpiry } from '../utils/helpers';
 
-export default function Dashboard({ onNavigate }) {
+export default function Dashboard({ onNavigate, user }) {
   const [tenants, setTenants] = useState([]);
 
   // Charge les locataires au montage et à chaque focus
   useEffect(() => {
-    const load = () => setTenants(loadTenants());
+    const load = async () => {
+      if (!user) return;
+
+      try {
+        const data = await fetchTenants(user.uid);
+        setTenants(data);
+      } catch (err) {
+        console.error('Erreur chargement dashboard:', err);
+      }
+    };
     load();
     window.addEventListener('focus', load);
     return () => window.removeEventListener('focus', load);
-  }, []);
+  }, [user]);
 
   // Calculs des statistiques
   const expired = tenants.filter(t => getDaysUntilExpiry(t.endDate) < 0);
@@ -60,7 +69,7 @@ export default function Dashboard({ onNavigate }) {
           {/* Actifs */}
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-4 flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-green-50 dark:bg-green-900/20 flex items-center justify-center">
-              <CheckCircle size={20} className="text-green-500" />
+              <CheckCircle2 size={20} className="text-green-500" />
             </div>
             <div>
               <p className="text-2xl font-bold text-gray-800 dark:text-white">{active.length}</p>

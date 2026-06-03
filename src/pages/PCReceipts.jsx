@@ -1,24 +1,51 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FileText, Download, Calendar, DollarSign, Clock } from 'lucide-react';
-import { loadTenants, saveTenants } from '../utils/storage';
+import { fetchTenants, updateTenant } from '../utils/firestore';
 import { formatDate, formatNumber } from '../utils/helpers';
 import { generateReceipt } from '../utils/receipt';
 
-export default function PCReceipts() {
-  const [tenants, setTenants] = useState(() => loadTenants());
+export default function PCReceipts({ user }) {
+  const [tenants, setTenants] = useState([]);
+
+  // Charge les locataires au montage
+  useEffect(() => {
+  const load = async () => {
+    if (!user) return;
+
+    try {
+      const data = await fetchTenants(user.uid);
+      setTenants(data);
+    } catch (err) {
+      console.error('Erreur chargement reçus:', err);
+    }
+  };
+
+  load();
+}, [user]);
 
   // Filtre uniquement les locataires ayant au moins un reçu généré
-  const tenantsWithReceipts = tenants.filter(t => (t.receiptCount || 1) >= 1);
+  const tenantsWithReceipts = tenants;
 
-  const handleReceipt = (tenant) => {
-    generateReceipt(tenant);
-    // Incrémente le compteur de reçus
-    const updated = tenants.map(t =>
-      t.id === tenant.id ? { ...t, receiptCount: (t.receiptCount || 1) + 1 } : t
+  // Gère la génération du reçu PDF
+  const handleReceipt = async (tenant) => {
+  generateReceipt(tenant);
+
+  const newCount = (tenant.receiptCount || 0) + 1;
+
+  try {
+    await updateTenant(tenant.id, {
+      receiptCount: newCount
+    });
+
+    setTenants(prev =>
+      prev.map(t =>
+        t.id === tenant.id ? { ...t, receiptCount: newCount } : t
+      )
     );
-    setTenants(updated);
-    saveTenants(updated);
-  };
+  } catch (err) {
+    console.error('Erreur update receipt:', err);
+  }
+};
 
   return (
     <div className="p-8">
@@ -27,7 +54,7 @@ export default function PCReceipts() {
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Reçus</h1>
         <p className="text-gray-400 text-sm mt-1">
-          {tenantsWithReceipts.length} reçu{tenantsWithReceipts.length > 1 ? 's' : ''} disponible{tenantsWithReceipts.length > 1 ? 's' : ''}
+          {tenants.length} locataire{tenants.length > 1 ? 's' : ''} — cliquez pour générer un reçu PDF
         </p>
       </div>
 

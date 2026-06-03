@@ -1,10 +1,11 @@
-import { Home, Users, Bell, Settings, FileText, LogOut } from 'lucide-react';
+import { Home, Users, Bell, Settings, FileText, LogOut, FolderOpen  } from 'lucide-react';
 import { useState } from 'react';
 
 export default function Sidebar({ activePage, onNavigate, onLogout }) {
   const navItems = [
     { key: 'dashboard', icon: Home, label: 'Dashboard' },
     { key: 'tenants', icon: Users, label: 'Locataires' },
+    { key: 'folders', icon: FolderOpen, label: 'Dossiers' },
     { key: 'receipts', icon: FileText, label: 'Reçus' },
     { key: 'notifications', icon: Bell, label: 'Alertes' },
   ];
@@ -102,7 +103,7 @@ export default function Sidebar({ activePage, onNavigate, onLogout }) {
       )}
 
         {/* Version */}
-        <p className="text-xs text-gray-400 px-4 mt-2">SmartBay v0.4.0</p>
+        <p className="text-xs text-gray-400 px-4 mt-2">SmartBay v1.0.0</p>
       </div>
     </aside>
   );

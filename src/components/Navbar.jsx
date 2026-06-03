@@ -1,11 +1,31 @@
+import { useState, useEffect } from 'react';
 import { Home, Users, Plus, Bell, Settings } from 'lucide-react';
-import { loadTenants } from '../utils/storage';
+import { fetchTenants } from '../utils/firestore';
 import { getDaysUntilExpiry } from '../utils/helpers';
 
-export default function Navbar({ activePage, onNavigate, hidden }) {
-  // Calcule le nombre d'alertes (expirés + bientôt)
-  const tenants = loadTenants();
-  const alertCount = tenants.filter(t => getDaysUntilExpiry(t.endDate) <= 7).length;
+export default function Navbar({ activePage, onNavigate, hidden, user }) {
+  const [tenants, setTenants] = useState([]);
+
+  // Charge les locataires depuis Firestore
+  useEffect(() => {
+    const load = async () => {
+      if (!user) return;
+
+      try {
+        const data = await fetchTenants(user.uid);
+        setTenants(data);
+      } catch (err) {
+        console.error('Erreur chargement navbar:', err);
+      }
+    };
+
+    load();
+  }, [user]);
+
+  // Calcule le nombre d'alertes
+  const alertCount = tenants.filter(
+    t => getDaysUntilExpiry(t.endDate) <= 7
+  ).length;
 
   const navItems = [
     { key: 'dashboard', icon: Home, label: 'Accueil' },
@@ -19,9 +39,10 @@ export default function Navbar({ activePage, onNavigate, hidden }) {
     <nav className={`fixed bottom-0 left-0 right-0 z-50 transition-transform duration-300 ${hidden ? 'translate-y-full' : 'translate-y-0'}`}>
       <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-2xl">
         <div className="flex justify-around items-center px-4 py-2">
+
           {navItems.map(({ key, icon: Icon, label, badge }) => {
 
-            // Bouton + circulaire flottant
+            // Bouton +
             if (key === 'add') {
               return (
                 <button
@@ -36,26 +57,37 @@ export default function Navbar({ activePage, onNavigate, hidden }) {
             }
 
             const isActive = activePage === key;
+
             return (
               <button
                 key={key}
                 onClick={() => onNavigate(key)}
-                className={`relative flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all duration-200
-                  ${isActive ? 'text-accent' : 'text-gray-400 dark:text-gray-500 hover:text-accent'}`}
+                className={`relative flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all duration-200 ${
+                  isActive
+                    ? 'text-accent'
+                    : 'text-gray-400 dark:text-gray-500 hover:text-accent'
+                }`}
               >
                 <div className="relative">
                   <Icon size={22} />
-                  {/* Badge rouge si alertes disponibles */}
+
+                  {/* Badge alertes */}
                   {badge > 0 && (
                     <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 rounded-full text-white text-[9px] font-bold flex items-center justify-center">
                       {badge > 9 ? '9+' : badge}
                     </span>
                   )}
                 </div>
-                {label && <span className="text-xs font-medium">{label}</span>}
+
+                {label && (
+                  <span className="text-xs font-medium">
+                    {label}
+                  </span>
+                )}
               </button>
             );
           })}
+
         </div>
       </div>
     </nav>

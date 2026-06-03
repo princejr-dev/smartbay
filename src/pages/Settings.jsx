@@ -1,17 +1,46 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, Moon, Bell, Server, Info, Trash2, ChevronRight, LogOut } from 'lucide-react';
-import { loadSettings, saveSettings, loadTenants, clearAll } from '../utils/storage';
-import { auth } from '../firebase';
+import { fetchTenants, clearAllTenants } from '../utils/firestore';
+import { loadSettings, saveSettings } from '../utils/storage';
 
-export default function Settings({ onBack, onThemeChange, onLogout }) {
+export default function Settings({ onBack, onThemeChange, onLogout, user }) {
+  
   // Initialisation lazy — chargé une seule fois au montage
-const [settings, setSettings] = useState(() => loadSettings());
-const [tenantCount, setTenantCount] = useState(() => loadTenants().length);
-const user = auth.currentUser;
+  const [settings, setSettings] = useState(() => {
+  return loadSettings() || {
+    theme: 'light',
+    notifications: true,
+    reminderDays: 1,
+  };
+});
+const [tenantCount, setTenantCount] = useState(0);
+const [showClearData, setShowClearData] = useState(false);
+const [toast, setToast] = useState('');
+
+const showToast = (msg) => {
+  setToast(msg);
+  setTimeout(() => setToast(''), 3500);
+};
+
+  // Charge le nombre de locataires au montage
+  useEffect(() => {
+    const load = async () => {
+      try {
+        if (!user?.uid) return;
+
+        const data = await fetchTenants(user.uid);
+        setTenantCount(data.length);
+      } catch (err) {
+        console.error('Erreur chargement locataires:', err);
+      }
+    };
+    load();
+  }, [user]);
 
   // Met à jour un paramètre et sauvegarde
   const update = (key, value) => {
     const updated = { ...settings, [key]: value };
+    
     setSettings(updated);
     saveSettings(updated);
 
@@ -22,13 +51,23 @@ const user = auth.currentUser;
   };
 
   // Supprime toutes les données
-  const handleClearData = () => {
-    if (window.confirm('Attention ! Toutes vos données seront supprimées. Cette action est irréversible. Voulez-vous continuer ?')) {
-      clearAll();
-      setTenantCount(0);
-      window.location.reload();
-    }
-  };
+  const handleClearData = async () => {
+  try {
+    await clearAllTenants(user.uid);
+
+    setShowClearData(false);
+
+    showToast(
+      <span className="flex items-center justify-center gap-1">
+        <Trash2 size={18} className="text-red-500" />
+        Toutes les données ont été supprimées
+      </span>
+    );
+
+  } catch (err) {
+    console.error('Erreur suppression globale:', err);
+  }
+};
 
   const [showLogout, setShowLogout] = useState(false);
 
@@ -71,7 +110,7 @@ const user = auth.currentUser;
         </p>
         <p className="text-white/70 text-sm mt-0.5">{user?.email}</p>
         <p className="text-white/50 text-xs mt-1">
-          Membre depuis{' '}
+          Membre depuis le{' '}
           {user?.metadata?.creationTime
             ? new Date(user.metadata.creationTime).toLocaleDateString('fr-FR', {
                 day: 'numeric', month: 'long', year: 'numeric'
@@ -103,7 +142,7 @@ const user = auth.currentUser;
               className={`relative w-12 h-6 rounded-full transition-colors duration-300
                 ${settings.theme === 'dark' ? 'bg-accent' : 'bg-gray-200 dark:bg-gray-600'}`}
             >
-              <span className={`absolute top-0.5 w-5 h-5 flex bg-white rounded-full shadow transition-transform duration-300
+              <span className={`flex absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-300
                 ${settings.theme === 'dark' ? 'translate-x-6' : 'translate-x-0.5'}`}
               />
             </button>
@@ -130,7 +169,7 @@ const user = auth.currentUser;
               className={`relative w-12 h-6 rounded-full transition-colors duration-300
                 ${settings.notifications ? 'bg-accent' : 'bg-gray-200 dark:bg-gray-600'}`}
             >
-              <span className={`absolute top-0.5 w-5 h-5 flex bg-white rounded-full shadow transition-transform duration-300
+              <span className={`flex  absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-300
                 ${settings.notifications ? 'translate-x-6' : 'translate-x-0.5'}`}
               />
             </button>
@@ -178,9 +217,10 @@ const user = auth.currentUser;
 
           {/* Supprimer les données */}
           <button
-            onClick={handleClearData}
+            onClick={() => setShowClearData(true)}
             className="w-full flex items-center justify-between p-4 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
           >
+            
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-red-50 dark:bg-red-900/20 flex items-center justify-center">
                 <Trash2 size={18} className="text-red-500" />
@@ -192,6 +232,41 @@ const user = auth.currentUser;
             </div>
             <ChevronRight size={18} className="text-gray-400" />
           </button>
+
+           {/* Modal confirmation suppression données */}
+            {showClearData && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-xl w-full max-w-sm">
+                  
+                  <p className="text-center font-semibold text-gray-900 dark:text-white mb-3">
+                    Êtes-vous sûr de vouloir supprimer vos données ?
+                  </p>
+                  
+                  <p className="text-sm text-center text-gray-500 dark:text-gray-400 mb-5 leading-relaxed">
+                    Cette action est irréversible. Tous vos données seront supprimés définitivement.
+                  </p>
+                
+                <div className="flex gap-3 text-center">
+                  
+                  <button
+                   onClick={() => setShowClearData(false)} 
+                   className="flex-1 py-2.5 rounded-xl bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                   >
+                    Annuler
+                  </button>
+                  
+                  <button
+                   onClick={handleClearData}
+                   className="flex-1 py-2.5 rounded-xl bg-red-500 text-white hover:bg-red-600 transition-colors"
+                   >
+                    Supprimer
+                  
+                  </button>
+                  
+                </div>
+               </div>
+              </div>
+            )}
         </div>
 
         {/* À propos */}
@@ -204,20 +279,20 @@ const user = auth.currentUser;
               </div>
               <p className="font-semibold text-gray-800 dark:text-white text-sm">Version</p>
             </div>
-            <span className="text-gray-400 text-sm">0.4.0</span>
+            <span className="text-gray-400 text-sm">1.0.0</span>
           </div>
         </div>
 
         {/* Déconnexion */}
-<button
+        <button
           onClick={() => setShowLogout(true)}
           className="w-full flex items-center justify-center gap-3 bg-red-50 dark:bg-red-900/20 text-red-500 py-4 rounded-2xl font-semibold hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors mt-2"
         >
           <LogOut size={18} />
           Se déconnecter
-</button>
-
-{/* Modal confirmation logout */}
+        </button>
+        
+        {/* Modal confirmation logout */}
       {showLogout && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
 
@@ -255,6 +330,12 @@ const user = auth.currentUser;
 
 
       </div>
+      {/* Toast de confirmation  */}
+      {toast && (
+      <div className="fixed bottom-24 left-4 right-4 max-w-2xl mx-auto bg-gray-900 text-white text-center py-3 px-5 rounded-xl shadow-xl z-50">
+        {toast}
+      </div>
+    )}
     </div>
   );
 }
