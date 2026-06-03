@@ -165,11 +165,11 @@ export default function PrivacyPolicy({ onBack }) {
             contactez-nous à :
           </p>
             <a
-            href="mailto:princejr.dev@gmail.com"
+            href="mailto:getsmartbay@gmail.com"
             className="inline-flex items-center gap-2 mt-3 text-accent font-semibold text-sm hover:underline"
           >
             <Mail size={16} />
-            princejr.dev@gmail.com
+            getsmartbay@gmail.com
           </a>
         </div>
 
