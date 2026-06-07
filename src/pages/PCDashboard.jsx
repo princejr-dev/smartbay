@@ -187,7 +187,7 @@ export default function PCDashboard({ searchTerm, activePage, user }) {
   const [editingTenant, setEditingTenant] = useState(null);
   const [toast, setToast] = useState('');
 
-  // Charge les locataires depuis Firestore à chaque changement de page
+  // Charge les locataires depuis Firestore à la connexion utilisateur
   useEffect(() => {
     const load = async () => {
       if (!user) return;
@@ -202,7 +202,7 @@ export default function PCDashboard({ searchTerm, activePage, user }) {
       }
     };
     load();
-  }, [user, activePage]);
+  }, [user]);
 
   const showToast = (msg) => {
     setToast(msg);
@@ -335,7 +335,7 @@ export default function PCDashboard({ searchTerm, activePage, user }) {
 
         {loading ? (
           <div className="flex justify-center py-24">
-            <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+            <div className="h-10 w-10 animate-spin rounded-full border-4 border-accent border-t-transparent" />
           </div>
         ) : (
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm overflow-hidden">
@@ -374,7 +374,7 @@ export default function PCDashboard({ searchTerm, activePage, user }) {
 
       {loading ? (
         <div className="flex justify-center py-24">
-          <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-accent border-t-transparent" />
         </div>
       ) : (
         <>
@@ -411,7 +411,7 @@ export default function PCDashboard({ searchTerm, activePage, user }) {
               {/* ✅ Graphique chargé en lazy */}
               <Suspense fallback={
                 <div className="h-52 flex items-center justify-center">
-                  <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+                  <div className="h-10 w-10 animate-spin rounded-full border-4 border-accent border-t-transparent" />
                 </div>
               }>
                 <RechartsChart data={revenueData} formatNumber={formatNumber} />

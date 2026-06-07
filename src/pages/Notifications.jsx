@@ -6,6 +6,7 @@ import { formatDate, formatNumber, getDaysUntilExpiry } from '../utils/helpers';
 // Carte de notification individuelle — définie en dehors du composant
 function NotifCard({ tenant, type }) {
   const days = getDaysUntilExpiry(tenant.endDate);
+  const [loading, setLoading] = useState(true);
 
   const config = {
     expired: {
@@ -32,6 +33,19 @@ function NotifCard({ tenant, type }) {
   }[type];
 
   const Icon = config.icon;
+
+    // Simule un chargement pour montrer le skeleton
+    useEffect(() => {
+      const timer = setTimeout(() => setLoading(false), 800);
+      return () => clearTimeout(timer);
+    }, []);
+    
+    // Skeleton de chargement
+    if (loading) {
+      return (
+      <div className={`w-full h-16 rounded-2xl bg-gray-200 dark:bg-gray-700 animate-pulse ${config.bg} ${config.border} mb-3`} />
+      );
+    }
 
   return (
     <div className={`bg-white dark:bg-gray-800 rounded-2xl shadow-sm border-l-4 ${config.border} p-4 mb-3 flex items-center gap-4`}>

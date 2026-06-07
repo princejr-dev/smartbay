@@ -19,10 +19,8 @@ const getInitialTheme = () => {
 // Fallback de chargement
 function PageLoader() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-accent to-accent-dark flex items-center justify-center">
-      <div className="text-center">
-        <div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto" />
-      </div>
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="h-10 w-10 animate-spin rounded-full border-4 border-accent border-t-transparent" />
     </div>
   );
 }
@@ -211,11 +209,18 @@ export default function App() {
   }
 
   if (showLanding) {
-    return <Landing onEnterApp={handleEnterApp} onNavigateLegal={setLegalPage} />;
+    return (
+      <Suspense fallback={<PageLoader />}>
+        <Landing 
+          onEnterApp={handleEnterApp} 
+          onNavigateLegal={setLegalPage} />
+      </Suspense>
+    );
   }
 
   if (!user) {
     return (
+      <Suspense fallback={<PageLoader />}>
       <div className="min-h-screen">
         {authPage === 'login' ? (
           <Login onNavigate={setAuthPage} />
@@ -223,6 +228,7 @@ export default function App() {
           <Register onNavigate={setAuthPage} onNavigateLegal={setLegalPage} />
         )}
       </div>
+      </Suspense>
     );
   }
 
@@ -248,13 +254,19 @@ export default function App() {
           />
 
           <main className="flex-1 overflow-auto bg-gray-50 dark:bg-gray-900">
-            {renderPCPage()}
+            <Suspense fallback={<PageLoader />}>
+              {renderPCPage()}
+            </Suspense>
           </main>
         </div>
       </div>
 
       <div className="md:hidden">
-        <main className="mx-auto max-w-2xl pb-24">{renderMobilePage()}</main>
+        <main className="mx-auto max-w-2xl pb-24">
+          <Suspense fallback={<PageLoader />}>
+            {renderMobilePage()}
+          </Suspense>
+        </main>
 
         {showMobileNavbar && (
           <Navbar
