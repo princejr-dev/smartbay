@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Users, AlertCircle, Clock, CheckCircle2, ArrowRight } from 'lucide-react';
 import { fetchTenants } from '../utils/firestore';
 import { formatNumber, getDaysUntilExpiry } from '../utils/helpers';
 
 export default function Dashboard({ onNavigate, user }) {
   const [tenants, setTenants] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   // Charge les locataires au montage et à chaque focus
   useEffect(() => {
@@ -16,6 +17,8 @@ export default function Dashboard({ onNavigate, user }) {
         setTenants(data);
       } catch (err) {
         console.error('Erreur chargement dashboard:', err);
+      } finally {
+        setLoading(false);
       }
     };
     load();
@@ -24,15 +27,54 @@ export default function Dashboard({ onNavigate, user }) {
   }, [user]);
 
   // Calculs des statistiques
-  const expired = tenants.filter(t => getDaysUntilExpiry(t.endDate) < 0);
-  const expiringSoon = tenants.filter(t => {
+const expired = useMemo(() =>
+  tenants.filter(t => getDaysUntilExpiry(t.endDate) < 0),
+  [tenants]
+);
+
+const expiringSoon = useMemo(() =>
+  tenants.filter(t => {
     const d = getDaysUntilExpiry(t.endDate);
     return d >= 0 && d <= 7;
-  });
-  const active = tenants.filter(t => getDaysUntilExpiry(t.endDate) > 7);
+  }),
+  [tenants]
+);
 
-  // Revenu mensuel total
-  const totalRevenue = tenants.reduce((sum, t) => sum + (t.rent || 0), 0);
+const active = useMemo(() =>
+  tenants.filter(t => getDaysUntilExpiry(t.endDate) > 7),
+  [tenants]
+);
+
+const totalRevenue = useMemo(() =>
+  tenants.reduce((sum, t) => sum + (t.rent || 0), 0),
+  [tenants]
+);
+
+// Skeleton de chargement
+if (loading) {
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="bg-gradient-to-br from-accent to-accent-dark px-6 pt-8 pb-20">
+        <div className="h-8 w-32 bg-white/20 rounded-xl animate-pulse" />
+        <div className="h-4 w-48 bg-white/10 rounded-xl animate-pulse mt-2" />
+      </div>
+      <div className="-mt-12 px-5">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-5 mb-5">
+          <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-2" />
+          <div className="h-8 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+        </div>
+        <div className="grid grid-cols-2 gap-3 mb-5">
+          {[1,2,3,4].map(i => (
+            <div key={i} className="bg-white dark:bg-gray-800 rounded-2xl p-4">
+              <div className="h-10 w-10 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse mb-2" />
+              <div className="h-6 w-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">

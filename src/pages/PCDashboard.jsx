@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+
 import {
   Users, TrendingUp, AlertCircle, CheckCircle,
   Plus, FileText, Pencil, Trash2, XCircle,
@@ -223,29 +224,51 @@ const handleDelete = async (id) => {
 };
 
   // Génère le reçu et incrémente le compteur
-  const handleReceipt = (tenant) => {
-    generateReceipt(tenant);
-    
-    showToast(
-      <span className="flex items-center justify-center gap-1">
-          <FileText size={20} />
-          Reçu généré !
-        </span>
-        );
-  };
-
-  const filtered = tenants.filter(t =>
-    `${t.civility} ${t.name}`.toLowerCase().includes((searchTerm || '').toLowerCase())
+  const handleReceipt = async (tenant) => {
+  generateReceipt(tenant);
+  const newCount = (tenant.receiptCount || 1) + 1;
+  try {
+    await updateTenant(tenant.id, { receiptCount: newCount });
+    setTenants(prev => prev.map(t =>
+      t.id === tenant.id ? { ...t, receiptCount: newCount } : t
+    ));
+  } catch (err) {
+    console.error('Erreur update receipt:', err);
+  }
+  showToast(
+    <span className="flex items-center justify-center gap-1">
+      <FileText size={20} />
+      Reçu généré !
+    </span>
   );
+};
 
-  const expired = tenants.filter(t => getDaysUntilExpiry(t.endDate) < 0);
-  const expiringSoon = tenants.filter(t => {
+  const filtered = useMemo(() =>
+  tenants.filter(t =>
+    `${t.civility} ${t.name}`.toLowerCase().includes((searchTerm || '').toLowerCase())
+  ), [tenants, searchTerm]);
+
+const expired = useMemo(() =>
+  tenants.filter(t => getDaysUntilExpiry(t.endDate) < 0),
+  [tenants]);
+
+const expiringSoon = useMemo(() =>
+  tenants.filter(t => {
     const d = getDaysUntilExpiry(t.endDate);
     return d >= 0 && d <= 7;
-  });
-  const active = tenants.filter(t => getDaysUntilExpiry(t.endDate) > 7);
-  const totalRevenue = tenants.reduce((sum, t) => sum + (t.rent || 0), 0);
-  const revenueData = buildRevenueData(tenants);
+  }), [tenants]);
+
+const active = useMemo(() =>
+  tenants.filter(t => getDaysUntilExpiry(t.endDate) > 7),
+  [tenants]);
+
+const totalRevenue = useMemo(() =>
+  tenants.reduce((sum, t) => sum + (t.rent || 0), 0),
+  [tenants]);
+
+const revenueData = useMemo(() =>
+  buildRevenueData(tenants),
+  [tenants]);
 
   // ===== PAGE LOCATAIRES =====
   if (activePage === 'tenants') {
@@ -318,7 +341,7 @@ const handleDelete = async (id) => {
             {[
               { label: 'Total locataires', value: tenants.length, icon: Users, color: 'bg-accent/10 text-accent', trend: null },
               { label: 'Locataires actifs', value: active.length, icon: CheckCircle, color: 'bg-green-50 dark:bg-green-900/20 text-green-500', trend: null },
-              { label: 'Revenus ce mois', value: `${formatNumber(totalRevenue)} FCFA`, icon: TrendingUp, color: 'bg-blue-50 dark:bg-blue-900/20 text-blue-500', trend: '+12%' },
+              { label: 'Revenus ce mois', value: `${formatNumber(totalRevenue)} FCFA`, icon: TrendingUp, color: 'bg-blue-50 dark:bg-blue-900/20 text-blue-500', trend: null },
               { label: 'Alertes', value: expired.length + expiringSoon.length, icon: AlertCircle, color: 'bg-red-50 dark:bg-red-900/20 text-red-500', trend: null },
             ].map(({ label, value, icon: Icon, color, trend }) => (
               <div key={label} className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm">
@@ -357,7 +380,7 @@ const handleDelete = async (id) => {
                   <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 12, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
                   <Tooltip
-                    contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '12px' }}
+                    contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '12px' }}
                     formatter={(value) => [`${formatNumber(value)} FCFA`, 'Revenus']}
                   />
                   <Area type="monotone" dataKey="revenus" stroke="#667eea" strokeWidth={2.5} fill="url(#colorRevenue)" />

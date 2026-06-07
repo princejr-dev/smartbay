@@ -26,7 +26,7 @@ export default function PrivacyPolicy({ onBack }) {
           </div>
           <h1 className="text-white text-2xl font-bold">Politique de confidentialité</h1>
         </div>
-        <p className="text-white/70 text-sm">Dernière mise à jour : juin 2026</p>
+        <p className="text-white/70 text-sm">Dernière mise à jour : Juin 2026</p>
       </div>
 
       <div className="max-w-3xl mx-auto px-6 py-10 space-y-8">

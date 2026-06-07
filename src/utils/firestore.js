@@ -12,23 +12,43 @@ import {
 } from 'firebase/firestore';
 import { db } from '../firebase';
 
+// ===== CACHE EN MÉMOIRE =====
+// Évite les requêtes Firestore répétées inutilement
+const cache = new Map();
+const CACHE_DURATION = 30000; // 30 secondes
+
+// Invalide le cache d'un utilisateur après modification
+export function invalidateCache(userId) {
+  cache.delete(`tenants_${userId}`);
+}
+
 // ===== LOCATAIRES =====
 
 // Charge tous les locataires d'un utilisateur
 export async function fetchTenants(userId) {
+  const cacheKey = `tenants_${userId}`;
+  const cached = cache.get(cacheKey);
+
+  // Retourne le cache si encore valide
+  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+    return cached.data;
+  }
+
   const q = query(
     collection(db, 'tenants'),
     where('userId', '==', userId),
     orderBy('createdAt', 'desc')
   );
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(doc => ({
+  const data = snapshot.docs.map(doc => ({
     // L'id Firestore du document (toujours une string)
     id: doc.id,
-    // Les données du document (on exclut l'ancien champ id s'il existe)
     ...doc.data(),
-    // On force l'id à être celui du document Firestore
   }));
+
+  // Sauvegarde en cache
+  cache.set(cacheKey, { data, timestamp: Date.now() });
+  return data;
 }
 
 // Ajoute un nouveau locataire
@@ -37,24 +57,31 @@ export async function addTenant(userId, tenantData) {
     ...tenantData,
     userId,
     // Premier contrat — reçu N°001
-    receiptCount: 1,
+    receiptCount: tenantData.receiptCount || 1,
     status: 'active',
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
-  return { id: docRef.id, ...tenantData, userId, receiptCount: 1 };
+
+  // Invalide le cache pour forcer le rechargement
+  invalidateCache(userId);
+
+  return { id: docRef.id, ...tenantData, userId, receiptCount: tenantData.receiptCount || 1 };
 }
 
-// updateTenant — garde juste (tenantId, data), pas de userId
+// Met à jour un locataire existant
 export async function updateTenant(tenantId, tenantData) {
   const ref = doc(db, 'tenants', tenantId);
   await updateDoc(ref, {
     ...tenantData,
     updatedAt: serverTimestamp(),
   });
+
+  // Invalide le cache si userId disponible
+  if (tenantData.userId) invalidateCache(tenantData.userId);
 }
 
-// deleteTenant — garde juste (tenantId), pas de userId
+// Supprime un locataire
 export async function deleteTenant(tenantId) {
   await deleteDoc(doc(db, 'tenants', tenantId));
 }
@@ -126,18 +153,20 @@ export async function deleteNote(noteId) {
   await deleteDoc(doc(db, 'notes', noteId));
 }
 
-// Supprime tous les locataires d'un utilisateur (fonction de nettoyage)
+// ===== NETTOYAGE =====
+
+// Supprime tous les locataires d'un utilisateur
 export async function clearAllTenants(userId) {
   const q = query(
     collection(db, 'tenants'),
     where('userId', '==', userId)
   );
-
   const snapshot = await getDocs(q);
-
   const deletions = snapshot.docs.map(document =>
     deleteDoc(doc(db, 'tenants', document.id))
   );
-
   await Promise.all(deletions);
+
+  // Invalide le cache après nettoyage
+  invalidateCache(userId);
 }

@@ -37,9 +37,21 @@
     <meta name="theme-color" content="#667eea" />
 
     <!-- ===== POLICE AUDIOWIDE ===== -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet" />
+     <link rel="preconnect" href="https://fonts.googleapis.com" />
+     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+     
+     <!-- APRÈS — chargement non bloquant -->
+     <link
+      href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap"
+      rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
+    />
+
+    <!-- Fallback pour les navigateurs sans JavaScript -->
+    <noscript>
+      <link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet" />
+    </noscript>
   </head>
 
   <body>

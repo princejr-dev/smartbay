@@ -94,7 +94,7 @@ npm run preview
 
 ### Version mobile
 1. Ouvrir l'application sur smartphone
-2. Cliquer sur **Commencer gratuitement** depuis la landing page
+2. Cliquer sur **Commencer à gérer** depuis la landing page
 3. Créer votre compte via **S'inscrire**
 4. Utiliser le bouton **+** central pour ajouter un locataire
 5. Remplir les informations : civilité, nom, téléphone, loyer, durée, date de début

@@ -1,241 +1,255 @@
-import { useState, useEffect } from 'react';
-import { Bell, Moon, Shield, ChevronRight, Menu, X,
-  Users, Receipt, AlertCircle, Smartphone
+import { useEffect, useState } from 'react';
+import {
+  AlertCircle,
+  Bell,
+  ChevronRight,
+  Menu,
+  Moon,
+  Receipt,
+  Shield,
+  Smartphone,
+  Users,
+  X,
+  Mail,
 } from 'lucide-react';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 
+// Données des cartes de fonctionnalités affichées sur la landing page.
+const features = [
+  {
+    icon: Users,
+    title: 'Gestion des locataires',
+    desc: 'Ajoutez, modifiez et suivez tous vos locataires en un seul endroit.',
+    color: 'bg-blue-50 dark:bg-blue-900/20 text-blue-500',
+  },
+  {
+    icon: Receipt,
+    title: 'Reçus PDF automatiques',
+    desc: 'Générez des reçus professionnels en un clic et partagez-les à vos locataires.',
+    color: 'bg-purple-50 dark:bg-purple-900/20 text-purple-500',
+  },
+  {
+    icon: Bell,
+    title: "Alertes d'expiration",
+    desc: "Recevez des alertes avant l'expiration des baux pour ne jamais rater un renouvellement.",
+    color: 'bg-orange-50 dark:bg-orange-900/20 text-orange-500',
+  },
+  {
+    icon: Moon,
+    title: 'Mode sombre',
+    desc: 'Interface adaptée à vos préférences avec un mode sombre élégant.',
+    color: 'bg-gray-50 dark:bg-gray-700/50 text-gray-500',
+  },
+  {
+    icon: Shield,
+    title: 'Données sécurisées',
+    desc: 'Vos données sont stockées sur le cloud et en toute sécurité.',
+    color: 'bg-green-50 dark:bg-green-900/20 text-green-500',
+  },
+  {
+    icon: Smartphone,
+    title: 'Responsive',
+    desc: 'Utilisez SmartBay sur mobile, tablette ou ordinateur sans contrainte.',
+    color: 'bg-accent/10 text-accent',
+  },
+];
+
+// Étapes affichées dans la section "Comment ça marche ?".
+const steps = [
+  {
+    number: '01',
+    title: 'Créez un locataire',
+    desc: 'Remplissez les informations du locataire : nom, loyer, durée et date de début.',
+  },
+  {
+    number: '02',
+    title: 'Générez un reçu',
+    desc: 'En un clic, un reçu PDF professionnel est généré et prêt à être partagé.',
+  },
+  {
+    number: '03',
+    title: 'Recevez des alertes',
+    desc: "SmartBay vous avertit avant l'expiration du bail pour agir à temps.",
+  },
+];
+
 export default function Landing({ onEnterApp, onNavigateLegal }) {
   const [menuOpen, setMenuOpen] = useState(false);
+
+  // Initialise les animations au scroll une seule fois au montage du composant.
   useEffect(() => {
-  AOS.init({
-    duration: 800,
-    once: true,
-  });
-}, []);
+    AOS.init({
+      duration: 800,
+      once: true,
+    });
+  }, []);
 
-{/* Contrôle de l'opacité du bouton heart en fonction du scroll 
-const [supportOpen, setSupportOpen] = useState(false); */}
-
-  const features = [
-    {
-      icon: Users,
-      title: 'Gestion des locataires',
-      desc: 'Ajoutez, modifiez et suivez tous vos locataires en un seul endroit.',
-      color: 'bg-blue-50 dark:bg-blue-900/20 text-blue-500',
-    },
-    {
-      icon: Receipt,
-      title: 'Reçus PDF automatiques',
-      desc: 'Générez des reçus professionnels en un clic et partagez-les à vos locataires.',
-      color: 'bg-purple-50 dark:bg-purple-900/20 text-purple-500',
-    },
-    {
-      icon: Bell,
-      title: "Alertes d'expiration",
-      desc: "Recevez des alertes avant l'expiration des baux pour ne jamais rater un renouvellement.",
-      color: 'bg-orange-50 dark:bg-orange-900/20 text-orange-500',
-    },
-    {
-      icon: Moon,
-      title: 'Mode sombre',
-      desc: 'Interface adaptée à vos préférences avec un mode sombre élégant.',
-      color: 'bg-gray-50 dark:bg-gray-700/50 text-gray-500',
-    },
-    {
-      icon: Shield,
-      title: 'Données sécurisées',
-      desc: 'Vos données sont stockées sur le cloud et en toute sécurité.',
-      color: 'bg-green-50 dark:bg-green-900/20 text-green-500',
-    },
-    {
-      icon: Smartphone,
-      title: 'Responsive',
-      desc: 'Utilisez SmartBay sur mobile, tablette ou ordinateur sans contrainte.',
-      color: 'bg-accent/10 text-accent',
-    },
-  ];
-
-  const steps = [
-    {
-      number: '01',
-      title: 'Créez un locataire',
-      desc: 'Remplissez les informations du locataire : nom, loyer, durée et date de début.',
-    },
-    {
-      number: '02',
-      title: 'Générez un reçu',
-      desc: 'En un clic, un reçu PDF professionnel est généré et prêt à être partagé.',
-    },
-    {
-      number: '03',
-      title: 'Recevez des alertes',
-      desc: "SmartBay vous avertit avant l'expiration du bail pour agir à temps.",
-    },
-  ];
+  // Ferme le menu mobile avant de laisser App.jsx gérer l'entrée dans l'app.
+  const handleEnterApp = () => {
+    setMenuOpen(false);
+    onEnterApp();
+  };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900 font-sans">
-
-      {/* ===== NAVBAR ===== */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800">
-        
-        {/* Conteneur centré avec padding horizontal */}
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          
-          {/* Logo */}
+    <div className="min-h-screen bg-white font-sans dark:bg-gray-900">
+      <nav className="fixed left-0 right-0 top-0 z-50 border-b border-gray-100 bg-white/80 backdrop-blur-md dark:border-gray-800 dark:bg-gray-900/80">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
-            <img src="/favicon.png" alt="SmartBay" className="w-8 h-8 rounded" />
-            <span className="font-audiowide text-accent text-xl">SmartBay</span>
+            <img src="/favicon.webp" alt="SmartBay" className="h-8 w-8 rounded" />
+            <span className="font-audiowide text-xl text-accent">SmartBay</span>
           </div>
 
-          {/* Liens de navigation - cachés sur mobile */}
-          <div className="hidden md:flex items-center gap-8">
-            
-            <a href="#features" className="text-gray-600 dark:text-gray-300 hover:text-accent dark:hover:text-accent transition-colors text-sm">
+          <div className="hidden items-center gap-8 md:flex">
+            <a
+              href="#features"
+              className="text-sm text-gray-600 transition-colors hover:text-accent dark:text-gray-300 dark:hover:text-accent"
+            >
               Fonctionnalités
             </a>
-
-            <a href="#how" className="text-gray-600 dark:text-gray-300 hover:text-accent dark:hover:text-accent transition-colors text-sm">
+            <a
+              href="#how"
+              className="text-sm text-gray-600 transition-colors hover:text-accent dark:text-gray-300 dark:hover:text-accent"
+            >
               Comment ça marche ?
             </a>
-
             <button
-              onClick={onEnterApp}
-              className="bg-gradient-to-r from-accent to-accent-dark text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 transition-all"
+              type="button"
+              onClick={handleEnterApp}
+              className="rounded-xl bg-gradient-to-r from-accent to-accent-dark px-5 py-2.5 text-sm font-semibold text-white transition-all hover:opacity-90"
             >
-              Accéder à l'app
+              Accéder à l&apos;app
             </button>
           </div>
 
-          {/* Menu mobile - affiché lorsque menuOpen est true */}
           <button
-            className="md:hidden p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800"
-            onClick={() => setMenuOpen(!menuOpen)}
+            type="button"
+            className="rounded-xl p-2 hover:bg-gray-100 dark:hover:bg-gray-800 md:hidden"
+            onClick={() => setMenuOpen((isOpen) => !isOpen)}
+            aria-label={menuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
+            aria-expanded={menuOpen}
           >
-            {menuOpen
-              ? <X size={22} className="text-gray-600 dark:text-gray-300" />
-              : <Menu size={22} className="text-gray-600 dark:text-gray-300" />
-            }
+            {menuOpen ? (
+              <X size={22} className="text-gray-600 dark:text-gray-300" />
+            ) : (
+              <Menu size={22} className="text-gray-600 dark:text-gray-300" />
+            )}
           </button>
         </div>
 
-        {/* Menu déroulant mobile */}
-        {menuOpen && ( 
-            <div className="md:hidden absolute top-16 right-6 w-56 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-800 overflow-hidden animate-fade-in">
-    
-        <a
-           href="#features"
-           onClick={() => setMenuOpen(false)}
-           className="block px-5 py-4 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-        >
-           Fonctionnalités
-        </a>
+        {menuOpen && (
+          <div className="animate-fade-in absolute right-6 top-16 w-56 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-2xl dark:border-gray-800 dark:bg-gray-900 md:hidden">
+            <a
+              href="#features"
+              onClick={() => setMenuOpen(false)}
+              className="block px-5 py-4 text-sm text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
+            >
+              Fonctionnalités
+            </a>
+            <a
+              href="#how"
+              onClick={() => setMenuOpen(false)}
+              className="block border-t border-gray-100 px-5 py-4 text-sm text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-800 dark:text-gray-300 dark:hover:bg-gray-800"
+            >
+              Comment ça marche ?
+            </a>
+            <button
+              type="button"
+              onClick={handleEnterApp}
+              className="w-full border-t border-gray-100 bg-accent px-5 py-4 text-center text-sm font-semibold text-white transition-colors hover:bg-accent-dark dark:border-gray-800"
+            >
+              Accéder à l&apos;app
+            </button>
+          </div>
+        )}
+      </nav>
 
-        <a
-            href="#how"
-            onClick={() => setMenuOpen(false)}
-            className="block px-5 py-4 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors border-t border-gray-100 dark:border-gray-800"
-        >
-            Comment ça marche ?
-        </a>
-
-        <button
-            onClick={() => {
-            setMenuOpen(false);
-            onEnterApp();
-           }}
-            className="w-full text-center px-5 py-4 text-sm font-semibold bg-accent text-white hover:bg-accent-dark transition-colors border-t border-gray-100 dark:border-gray-800"
-        >
-            Accéder à l'app
-        </button>
-
-     </div>
-      )}
-    </nav>
-
-      {/* ===== HERO ===== */}
-      <section data-aos="fade-up" className="pt-32 pb-20 px-6 bg-gradient-to-br from-accent/5 via-white to-accent-dark/5 dark:from-accent/10 dark:via-gray-900 dark:to-accent-dark/10">
-        
-        <div data-aos="fade-up" className="max-w-4xl mx-auto text-center">
-          
-          <div data-aos="fade-up" className="inline-flex items-center gap-2 bg-accent/10 text-accent px-4 py-2 rounded-full text-sm font-semibold mb-8">
+      <section
+        data-aos="fade-up"
+        className="bg-gradient-to-br from-accent/5 via-white to-accent-dark/5 px-6 pb-20 pt-32 dark:from-accent/10 dark:via-gray-900 dark:to-accent-dark/10"
+      >
+        <div className="mx-auto max-w-4xl text-center">
+          <div
+            data-aos="fade-up"
+            className="mb-8 inline-flex items-center gap-2 rounded-full bg-accent/10 px-4 py-2 text-sm font-semibold text-accent"
+          >
             <AlertCircle size={14} />
             Gestion locative simplifiée
           </div>
 
-          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
+          <h1 className="mb-6 text-4xl font-bold leading-tight text-gray-900 dark:text-white md:text-6xl">
             Gérez vos locataires
             <span className="bg-gradient-to-r from-accent to-accent-dark bg-clip-text text-transparent">
-              {' '}en toute simplicité
+              {' '}
+              en toute simplicité
             </span>
           </h1>
 
-          <p className="text-lg md:text-xl text-gray-500 dark:text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed">
+          <p className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-gray-500 dark:text-gray-400 md:text-xl">
             SmartBay vous permet de suivre vos locataires, générer des reçus PDF professionnels
-            et recevoir des alertes avant l&#39;expiration des baux.
+            et recevoir des alertes avant l&apos;expiration des baux.
           </p>
 
-          <div data-aos="fade-up" className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div data-aos="fade-up" className="flex flex-col justify-center gap-4 sm:flex-row">
             <button
-              onClick={onEnterApp}
-              className="flex items-center justify-center gap-2 bg-gradient-to-r from-accent to-accent-dark text-white px-8 py-4 rounded-2xl text-base font-bold hover:opacity-90 hover:scale-105 transition-all shadow-lg shadow-accent/30"
+              type="button"
+              onClick={handleEnterApp}
+              className="flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-accent to-accent-dark px-8 py-4 text-base font-bold text-white shadow-lg shadow-accent/30 transition-all hover:scale-105 hover:opacity-90"
             >
               Commencer à gérer
               <ChevronRight size={20} />
             </button>
-            
-              <a href="#features" className="flex items-center justify-center gap-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-8 py-4 rounded-2xl text-base font-semibold border-2 border-gray-200 dark:border-gray-700 hover:border-accent dark:hover:border-accent transition-all">
-           Voir les fonctionnalités
-               </a>
+            <a
+              href="#features"
+              className="flex items-center justify-center gap-2 rounded-2xl border-2 border-gray-200 bg-white px-8 py-4 text-base font-semibold text-gray-700 transition-all hover:border-accent dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-accent"
+            >
+              Voir les fonctionnalités
+            </a>
           </div>
-
         </div>
       </section>
 
-      {/* ===== FONCTIONNALITÉS ===== */}
-      <section data-aos="fade-up" id="features" className="py-20 px-6 bg-gray-50 dark:bg-gray-800/50">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+      <section
+        data-aos="fade-up"
+        id="features"
+        className="bg-gray-50 px-6 py-20 dark:bg-gray-800/50"
+      >
+        <div className="mx-auto max-w-6xl">
+          <div className="mb-14 text-center">
+            <h2 className="mb-4 text-3xl font-bold text-gray-900 dark:text-white md:text-4xl">
               Tout ce dont vous avez besoin
             </h2>
-            <p className="text-gray-500 dark:text-gray-400 max-w-xl mx-auto">
+            <p className="mx-auto max-w-xl text-gray-500 dark:text-gray-400">
               Une application simple et efficace pour les propriétaires immobiliers.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {features.map(({ icon: Icon, title, desc, color }, index) => (
-              <div key={title}
-                   data-aos="fade-up"
-                   data-aos-delay={index * 100}
-                   className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-200">
-                
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${color}`}>
+              <div
+                key={title}
+                data-aos="fade-up"
+                data-aos-delay={index * 100}
+                className="rounded-2xl bg-white p-6 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md dark:bg-gray-800"
+              >
+                <div className={`mb-4 flex h-12 w-12 items-center justify-center rounded-xl ${color}`}>
                   <Icon size={22} />
                 </div>
 
-                <h3 className="font-bold text-gray-800 dark:text-white mb-2">{title}</h3>
-                
-                <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">{desc}</p>
+                <h3 className="mb-2 font-bold text-gray-800 dark:text-white">{title}</h3>
+                <p className="text-sm leading-relaxed text-gray-500 dark:text-gray-400">{desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ===== COMMENT ÇA MARCHE ===== */}
-      <section data-aos="fade-up" id="how" className="py-20 px-6">
-        
-        <div className="max-w-4xl mx-auto">
-          
-          <div className="text-center mb-14">
-            
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+      <section data-aos="fade-up" id="how" className="px-6 py-20">
+        <div className="mx-auto max-w-4xl">
+          <div className="mb-14 text-center">
+            <h2 className="mb-4 text-3xl font-bold text-gray-900 dark:text-white md:text-4xl">
               Comment ça marche ?
             </h2>
-            
             <p className="text-gray-500 dark:text-gray-400">
               Trois étapes simples pour gérer vos locataires.
             </p>
@@ -243,16 +257,18 @@ const [supportOpen, setSupportOpen] = useState(false); */}
 
           <div className="flex flex-col gap-6">
             {steps.map(({ number, title, desc }, index) => (
-              <div key={number} 
-                   data-aos="fade-up"
-                     data-aos-delay={index * 100}
-                   className="flex items-start gap-6 bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-accent to-accent-dark text-white flex items-center justify-center font-bold text-lg flex-shrink-0">
+              <div
+                key={number}
+                data-aos="fade-up"
+                data-aos-delay={index * 100}
+                className="flex items-start gap-6 rounded-2xl bg-white p-6 shadow-sm dark:bg-gray-800"
+              >
+                <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-accent to-accent-dark text-lg font-bold text-white">
                   {number}
                 </div>
                 <div>
-                  <h3 className="font-bold text-gray-800 dark:text-white text-lg mb-1">{title}</h3>
-                  <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">{desc}</p>
+                  <h3 className="mb-1 text-lg font-bold text-gray-800 dark:text-white">{title}</h3>
+                  <p className="text-sm leading-relaxed text-gray-500 dark:text-gray-400">{desc}</p>
                 </div>
               </div>
             ))}
@@ -260,130 +276,74 @@ const [supportOpen, setSupportOpen] = useState(false); */}
         </div>
       </section>
 
-      {/* ===== CTA FINAL ===== */}
-      <section data-aos="fade-up" className="py-20 px-6 bg-gradient-to-br from-accent to-accent-dark">
-        
-        <div data-aos="fade-up" className="max-w-2xl mx-auto text-center">
-          <img src="/favicon.png" alt="SmartBay" className="w-16 h-16 mx-auto mb-6 rounded-xl" />
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+      <section
+        data-aos="fade-up"
+        className="bg-gradient-to-br from-accent to-accent-dark px-6 py-20"
+      >
+        <div className="mx-auto max-w-2xl text-center">
+          <img src="/favicon.webp" alt="SmartBay" className="mx-auto mb-6 h-16 w-16 rounded-xl" />
+          <h2 className="mb-4 text-3xl font-bold text-white md:text-4xl">
             Prêt à simplifier votre gestion ?
           </h2>
-
-          <p className="text-white/80 mb-8 text-lg">
+          <p className="mb-8 text-lg text-white/80">
             Rejoignez SmartBay et gérez vos locataires en toute sérénité.
           </p>
-
           <button
-            onClick={onEnterApp}
+            type="button"
+            onClick={handleEnterApp}
             data-aos="fade-up"
-            className="bg-white text-accent px-8 py-4 rounded-2xl font-bold text-base hover:scale-105 transition-all shadow-lg"
+            className="rounded-2xl bg-white px-8 py-4 text-base font-bold text-accent shadow-lg transition-all hover:scale-105"
           >
-            Accéder à l&#39;application
+            Accéder à l&apos;application
           </button>
-
         </div>
       </section>
 
-      {/* ===== FOOTER ===== */}
-<footer className="py-8 px-6 bg-gray-900">
-  <div className="max-w-6xl mx-auto">
-
-    {/* Logo + description */}
-    <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-6">
-      <div className="flex items-center gap-2">
-        <img src="/favicon.png" alt="SmartBay" className="w-6 h-6 rounded" />
-        <span className="font-audiowide text-white">SmartBay</span>
-      </div>
-      <p className="text-gray-500 text-sm text-center font-semibold">
-        Gestion locative intelligente
-      </p>
-    </div>
-
-    {/* Séparateur */}
-    <div className="h-px bg-gray-800 mb-6" />
-
-    {/* Liens légaux + copyright */}
-    <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-      <p className="text-gray-500 text-sm">
-        &copy; 2026 SmartBay. Tous droits réservés.
-      </p>
-      <div className="flex items-center gap-6">
-        <button
-          onClick={() => onNavigateLegal('privacy')}
-          className="text-gray-400 hover:text-accent text-sm transition-colors"
-        >
-          Politique de confidentialité
-        </button>
-        <span className="text-gray-700">•</span>
-        <button
-          onClick={() => onNavigateLegal('terms')}
-          className="text-gray-400 hover:text-accent text-sm transition-colors"
-        >
-          CGU
-        </button>
-      </div>
-    </div>
-  </div>
-</footer>
-
-
-      
-      {/* ===== SUPPORT FLOATING BUTTON 
-    <div className="fixed bottom-6 right-6 z-50">
-        
-        {supportOpen && (
-            <div className="absolute bottom-16 right-0 w-64 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-2xl overflow-hidden animate-fade-in">
-                
-                <div className="p-4 border-b border-gray-100 dark:border-gray-800">
-                    <h3 className="font-bold text-gray-800 dark:text-white text-sm text-center">
-                        Me Soutenir ?
-                    </h3>
-                </div>
-                
-                <button className="w-full flex items-center gap-3 px-4 py-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-left">
-                    <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
-                    
-                        <CreditCard size={18} className="text-blue-500" />
-                    </div>
-                    
-                    <div>
-                        <p className="text-sm font-semibold text-gray-800 dark:text-white">
-                            Visa / Mastercard
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                            Paiement international
-                        </p>
-                    </div>
-                </button>
-                
-                <button className="w-full flex items-center gap-3 px-4 py-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-left border-t border-gray-100 dark:border-gray-800">
-                    <div className="w-10 h-10 rounded-xl bg-green-50 dark:bg-green-900/20 flex items-center justify-center">
-                        
-                        <Smartphone size={18} className="text-green-500" />
-                    </div>
-                    
-                    <div>
-                        <p className="text-sm font-semibold text-gray-800 dark:text-white">
-                           Mobile Money
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                           MTN / Orange Money
-                        </p>
-                    </div>
-                </button>
-
+      <footer className="bg-gray-900 px-6 py-8">
+        <div className="mx-auto max-w-6xl">
+          <div className="mb-6 flex flex-col items-center justify-between gap-6 md:flex-row">
+            <div className="flex items-center gap-2">
+              <img src="/favicon.webp" alt="SmartBay" className="h-6 w-6 rounded" />
+              <span className="font-audiowide text-white">SmartBay</span>
             </div>
-            )}
+            <p className="text-center text-sm font-semibold text-gray-500">
+              Gestion locative intelligente
+            </p>
+          </div>
 
-            <button
-                 onClick={() => setSupportOpen(!supportOpen)}
-                 className="w-14 h-14 rounded-full bg-gradient-to-br from-pink-500 to-red-500 text-white shadow-2xl flex items-center justify-center hover:scale-110 transition-all"
-                >
-    
-                <Heart size={22} fill="currentColor" />
-            </button>
-        </div> ===== */}
+          <div className="mb-6 h-px bg-gray-800" />
 
+          <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
+            <p className="text-sm text-gray-500">
+              &copy; 2026 SmartBay. Tous droits réservés.
+            </p>
+            <div className="flex items-center gap-6">
+              <button
+                type="button"
+                onClick={() => onNavigateLegal('privacy')}
+                className="text-sm text-gray-400 transition-colors hover:text-accent"
+              >
+                Politique de confidentialité
+              </button>
+              <span className="text-gray-700">•</span>
+              <button
+                type="button"
+                onClick={() => onNavigateLegal('terms')}
+                className="text-sm text-gray-400 transition-colors hover:text-accent"
+              >
+                CGU
+              </button>
+              <span className="text-gray-700">•</span>
+              <a
+                href="mailto:getsmartbay@gmail.com"
+                className="text-sm text-gray-400 transition-colors hover:text-accent"
+              >
+                <Mail size={18} />
+              </a>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
