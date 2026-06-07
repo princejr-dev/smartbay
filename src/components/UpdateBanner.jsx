@@ -49,7 +49,7 @@ export default function UpdateBanner() {
           
           <div className="flex-1">
             <p className="text-white font-bold text-sm mb-0.5">
-              SmartBay v{version} — Première Version Officielle
+              SmartBay v{version} — Nouvelle mise à jour disponible !
             </p>
             <p className="text-white/80 text-xs leading-relaxed">{message}</p>
           </div>
