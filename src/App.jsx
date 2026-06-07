@@ -1,6 +1,11 @@
 import { useEffect, useState, lazy, Suspense } from 'react';
 import { logout, onAuthChange } from './utils/auth';
 import { loadSettings, saveSettings } from './utils/storage';
+import Dashboard from './pages/Dashboard';
+import Notifications from './pages/Notifications';
+import Settings from './pages/Settings';
+import Tenants from './pages/Tenants';
+import PCDashboard from './pages/PCDashboard';
 
 // Pages mobiles où la navbar du bas gênerait l'expérience.
 const MOBILE_PAGES_WITHOUT_NAVBAR = ['tenants', 'notifications', 'settings'];
@@ -16,23 +21,18 @@ function PageLoader() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-accent to-accent-dark flex items-center justify-center">
       <div className="text-center">
-        <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto" />
+        <div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto" />
       </div>
     </div>
   );
 }
 
 // Pages chargées à la demande (lourdes)
-const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Landing = lazy(() => import('./pages/Landing'));
 const Login = lazy(() => import('./pages/Login'));
-const Notifications = lazy(() => import('./pages/Notifications'));
-const PCDashboard = lazy(() => import('./pages/PCDashboard'));
 const PCReceipts = lazy(() => import('./pages/PCReceipts'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const Register = lazy(() => import('./pages/Register'));
-const Settings = lazy(() => import('./pages/Settings'));
-const Tenants = lazy(() => import('./pages/Tenants'));
 const TenantFolder = lazy(() => import('./pages/TenantFolder'));
 const TenantFolderDetail = lazy(() => import('./pages/TenantFolderDetail'));
 const TermsOfService = lazy(() => import('./pages/TermsOfService'));
