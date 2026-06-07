@@ -1,19 +1,46 @@
-import { useState, useEffect, useMemo } from 'react';
-
+import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import {
   Users, TrendingUp, AlertCircle, CheckCircle,
-  Plus, FileText, Pencil, Trash2, XCircle,
-  CheckCircle2
+  Plus, FileText, Pencil, Trash2, XCircle, CheckCircle2
 } from 'lucide-react';
-import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer
-} from 'recharts';
 import { formatNumber, formatDate, getDaysUntilExpiry } from '../utils/helpers';
 import { generateReceipt } from '../utils/receipt';
 import TenantModal from '../components/TenantModal';
 import { fetchTenants, addTenant, updateTenant, deleteTenant } from '../utils/firestore';
 
+// ✅ Import dynamique recharts — chargé seulement quand nécessaire
+const RechartsChart = lazy(() =>
+  import('recharts').then(module => ({
+    default: function Charts({ data, formatNumber }) {
+      const {
+        AreaChart, Area, XAxis, YAxis,
+        CartesianGrid, Tooltip, ResponsiveContainer
+      } = module;
+      return (
+        <ResponsiveContainer width="100%" height={200}>
+          <AreaChart data={data}>
+            <defs>
+              <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#667eea" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="#667eea" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+            <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fontSize: 12, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
+            <Tooltip
+              contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '12px' }}
+              formatter={(value) => [`${formatNumber(value)} FCFA`, 'Revenus']}
+            />
+            <Area type="monotone" dataKey="revenus" stroke="#667eea" strokeWidth={2.5} fill="url(#colorRevenue)" />
+          </AreaChart>
+        </ResponsiveContainer>
+      );
+    }
+  }))
+);
+
+// Génère les données du graphique sur 6 mois
 function buildRevenueData(tenants) {
   const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin',
     'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
@@ -53,7 +80,6 @@ function TenantsTable({ tenants, onEdit, onDelete, onReceipt }) {
           <th className="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Actions</th>
         </tr>
       </thead>
-
       <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
         {tenants.map(tenant => {
           const days = getDaysUntilExpiry(tenant.endDate);
@@ -62,13 +88,11 @@ function TenantsTable({ tenants, onEdit, onDelete, onReceipt }) {
 
           return (
             <tr key={tenant.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
-              
               <td className="px-6 py-4">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-xl bg-accent/10 flex items-center justify-center flex-shrink-0">
                     <Users size={16} className="text-accent" />
                   </div>
-
                   <div>
                     <p className="font-semibold text-gray-800 dark:text-white text-sm">
                       {tenant.civility} {tenant.name}
@@ -94,7 +118,9 @@ function TenantsTable({ tenants, onEdit, onDelete, onReceipt }) {
               </td>
 
               <td className="px-6 py-4">
-                <p className="font-semibold text-accent text-sm">{formatNumber(tenant.rent * tenant.duration)} FCFA</p>
+                <p className="font-semibold text-accent text-sm">
+                  {formatNumber(tenant.rent * tenant.duration)} FCFA
+                </p>
               </td>
 
               <td className="px-6 py-4">
@@ -102,28 +128,46 @@ function TenantsTable({ tenants, onEdit, onDelete, onReceipt }) {
                   {formatDate(tenant.endDate)}
                 </p>
                 <p className={`text-xs ${isExpired ? 'text-red-400' : isSoon ? 'text-orange-400' : 'text-gray-400'}`}>
-                  {isExpired ? `${Math.abs(days)} ${Math.abs(days) <= 1 ? 'jour de retard' : 'jours de retard'}` : `${Math.abs(days)} ${Math.abs(days) <= 1 ? 'jour restant' : 'jours restants'}`}
+                  {isExpired
+                    ? `${Math.abs(days)} ${Math.abs(days) <= 1 ? 'jour de retard' : 'jours de retard'}`
+                    : `${Math.abs(days)} ${Math.abs(days) <= 1 ? 'jour restant' : 'jours restants'}`
+                  }
                 </p>
               </td>
 
               <td className="px-6 py-4">
                 <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold
-                  ${isExpired ? 'bg-red-50 dark:bg-red-900/20 text-red-500'
-                    : isSoon ? 'bg-orange-50 dark:bg-orange-900/20 text-orange-500'
-                    : 'bg-green-50 dark:bg-green-900/20 text-green-500'}`}>
+                  ${isExpired
+                    ? 'bg-red-50 dark:bg-red-900/20 text-red-500'
+                    : isSoon
+                    ? 'bg-orange-50 dark:bg-orange-900/20 text-orange-500'
+                    : 'bg-green-50 dark:bg-green-900/20 text-green-500'
+                  }`}>
                   {isExpired ? 'Expiré' : isSoon ? 'Bientôt' : 'Actif'}
                 </span>
               </td>
 
               <td className="px-6 py-4">
                 <div className="flex items-center gap-2">
-                  <button onClick={() => onReceipt(tenant)} className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center hover:bg-blue-100 transition-colors" title="Reçu">
+                  <button
+                    onClick={() => onReceipt(tenant)}
+                    className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center hover:bg-blue-100 transition-colors"
+                    title="Reçu"
+                  >
                     <FileText size={14} className="text-blue-500" />
                   </button>
-                  <button onClick={() => onEdit(tenant)} className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center hover:bg-accent/20 transition-colors" title="Modifier">
+                  <button
+                    onClick={() => onEdit(tenant)}
+                    className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center hover:bg-accent/20 transition-colors"
+                    title="Modifier"
+                  >
                     <Pencil size={14} className="text-accent" />
                   </button>
-                  <button onClick={() => onDelete(tenant.id)} className="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center hover:bg-red-100 transition-colors" title="Supprimer">
+                  <button
+                    onClick={() => onDelete(tenant.id)}
+                    className="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center hover:bg-red-100 transition-colors"
+                    title="Supprimer"
+                  >
                     <Trash2 size={14} className="text-red-500" />
                   </button>
                 </div>
@@ -144,21 +188,21 @@ export default function PCDashboard({ searchTerm, activePage, user }) {
   const [toast, setToast] = useState('');
 
   // Charge les locataires depuis Firestore à chaque changement de page
-useEffect(() => {
-  const load = async () => {
-    if (!user) return;
-    setLoading(true);
-    try {
-      const data = await fetchTenants(user.uid);
-      setTenants(data);
-    } catch (err) {
-      console.error('Erreur chargement:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-  load();
-}, [user, activePage]);
+  useEffect(() => {
+    const load = async () => {
+      if (!user) return;
+      setLoading(true);
+      try {
+        const data = await fetchTenants(user.uid);
+        setTenants(data);
+      } catch (err) {
+        console.error('Erreur chargement:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, [user, activePage]);
 
   const showToast = (msg) => {
     setToast(msg);
@@ -166,109 +210,108 @@ useEffect(() => {
   };
 
   // Sauvegarde via Firestore
-const handleSave = async (tenantData) => {
-  try {
-    if (tenantData.id && typeof tenantData.id === 'string') {
-      // Modification — id Firestore existant (string)
-      await updateTenant(tenantData.id, tenantData);
-      setTenants(prev => prev.map(t => t.id === tenantData.id ? { ...t, ...tenantData } : t));
-      showToast(
-        <span className="flex items-center justify-center gap-1">
-            <Pencil size={20} className="text-green-500 font-bold" />
+  const handleSave = async (tenantData) => {
+    try {
+      if (tenantData.id && typeof tenantData.id === 'string') {
+        await updateTenant(tenantData.id, tenantData);
+        setTenants(prev => prev.map(t => t.id === tenantData.id ? { ...t, ...tenantData } : t));
+        showToast(
+          <span className="flex items-center justify-center gap-1">
+            <Pencil size={20} className="text-green-500" />
             Modifié avec succès !
-        </span>
-          );
-    } else {
-      // Ajout — pas d'id ou id numérique → Firestore génère un id string
-      const saved = await addTenant(user.uid, tenantData);
-      setTenants(prev => [saved, ...prev]);
+          </span>
+        );
+      } else {
+        const saved = await addTenant(user.uid, tenantData);
+        setTenants(prev => [saved, ...prev]);
+        showToast(
+          <span className="flex items-center justify-center gap-1">
+            <CheckCircle2 size={20} className="text-green-500" />
+            Ajouté avec succès !
+          </span>
+        );
+      }
+    } catch (err) {
+      console.error('Erreur sauvegarde:', err);
       showToast(
         <span className="flex items-center justify-center gap-1">
-            <CheckCircle2 size={20} className="text-green-500 font-bold" />
-            Ajouté avec succès !
-        </span>
-        );
-    }
-  } catch (err) {
-    console.error('Erreur sauvegarde:', err);
-    showToast(
-      <span className="flex items-center justify-center gap-1">
-          <XCircle size={20} className="text-red-500 font-bold" />
+          <XCircle size={20} className="text-red-500" />
           Erreur lors de la sauvegarde.
-      </span>
+        </span>
       );
-  }
-  setModalVisible(false);
-  setEditingTenant(null);
-};
+    }
+    setModalVisible(false);
+    setEditingTenant(null);
+  };
 
-// Suppression via Firestore
-const handleDelete = async (id) => {
-  const tenant = tenants.find(t => t.id === id);
-  if (!tenant) return;
-  const article = tenant.civility === 'Mme' ? 'la' : 'le';
-  if (!window.confirm(`Voulez-vous supprimer ${article} locataire ${tenant.civility} ${tenant.name} ?`)) return;
-  try {
-    await deleteTenant(id);
-    setTenants(prev => prev.filter(t => t.id !== id));
-    showToast('🗑 Suppression réussie !');
-  } catch (err) {
-    console.error('Erreur suppression:', err);
-    showToast(
-      <span className="flex items-center justify-center gap-1">
-          <XCircle size={20} className="text-red-500 font-bold" />
+  // Suppression via Firestore
+  const handleDelete = async (id) => {
+    const tenant = tenants.find(t => t.id === id);
+    if (!tenant) return;
+    const article = tenant.civility === 'Mme' ? 'la' : 'le';
+    if (!window.confirm(`Voulez-vous supprimer ${article} locataire ${tenant.civility} ${tenant.name} ?`)) return;
+    try {
+      await deleteTenant(id);
+      setTenants(prev => prev.filter(t => t.id !== id));
+      showToast('🗑 Suppression réussie !');
+    } catch (err) {
+      console.error('Erreur suppression:', err);
+      showToast(
+        <span className="flex items-center justify-center gap-1">
+          <XCircle size={20} className="text-red-500" />
           Erreur lors de la suppression.
-      </span>
-    );
-  }
-};
+        </span>
+      );
+    }
+  };
 
   // Génère le reçu et incrémente le compteur
   const handleReceipt = async (tenant) => {
-  generateReceipt(tenant);
-  const newCount = (tenant.receiptCount || 1) + 1;
-  try {
-    await updateTenant(tenant.id, { receiptCount: newCount });
-    setTenants(prev => prev.map(t =>
-      t.id === tenant.id ? { ...t, receiptCount: newCount } : t
-    ));
-  } catch (err) {
-    console.error('Erreur update receipt:', err);
-  }
-  showToast(
-    <span className="flex items-center justify-center gap-1">
-      <FileText size={20} />
-      Reçu généré !
-    </span>
-  );
-};
+    generateReceipt(tenant);
+    const newCount = (tenant.receiptCount || 1) + 1;
+    try {
+      await updateTenant(tenant.id, { receiptCount: newCount });
+      setTenants(prev => prev.map(t =>
+        t.id === tenant.id ? { ...t, receiptCount: newCount } : t
+      ));
+    } catch (err) {
+      console.error('Erreur update receipt:', err);
+    }
+    showToast(
+      <span className="flex items-center justify-center gap-1">
+        <FileText size={20} />
+        Reçu généré !
+      </span>
+    );
+  };
 
+  // ✅ Tous les useMemo avant tout return conditionnel
   const filtered = useMemo(() =>
-  tenants.filter(t =>
-    `${t.civility} ${t.name}`.toLowerCase().includes((searchTerm || '').toLowerCase())
-  ), [tenants, searchTerm]);
+    tenants.filter(t =>
+      `${t.civility} ${t.name}`.toLowerCase().includes((searchTerm || '').toLowerCase())
+    ), [tenants, searchTerm]);
 
-const expired = useMemo(() =>
-  tenants.filter(t => getDaysUntilExpiry(t.endDate) < 0),
-  [tenants]);
+  const expired = useMemo(() =>
+    tenants.filter(t => getDaysUntilExpiry(t.endDate) < 0),
+    [tenants]);
 
-const expiringSoon = useMemo(() =>
-  tenants.filter(t => {
-    const d = getDaysUntilExpiry(t.endDate);
-    return d >= 0 && d <= 7;
-  }), [tenants]);
+  const expiringSoon = useMemo(() =>
+    tenants.filter(t => {
+      const d = getDaysUntilExpiry(t.endDate);
+      return d >= 0 && d <= 7;
+    }), [tenants]);
 
-const active = useMemo(() =>
-  tenants.filter(t => getDaysUntilExpiry(t.endDate) > 7),
-  [tenants]);
+  const active = useMemo(() =>
+    tenants.filter(t => getDaysUntilExpiry(t.endDate) > 7),
+    [tenants]);
 
-const totalRevenue = useMemo(() =>
-  tenants.reduce((sum, t) => sum + (t.rent || 0), 0),
-  [tenants]);
+  const totalRevenue = useMemo(() =>
+    tenants.reduce((sum, t) => sum + (t.rent || 0), 0),
+    [tenants]);
 
-const revenueData = useMemo(() =>
-  buildRevenueData(tenants),
-  [tenants]);
+  const revenueData = useMemo(() =>
+    buildRevenueData(tenants),
+    [tenants]);
 
   // ===== PAGE LOCATAIRES =====
   if (activePage === 'tenants') {
@@ -290,7 +333,6 @@ const revenueData = useMemo(() =>
           </button>
         </div>
 
-        {/* Loading */}
         {loading ? (
           <div className="flex justify-center py-24">
             <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
@@ -313,12 +355,12 @@ const revenueData = useMemo(() =>
         )}
 
         <TenantModal
-  key={editingTenant ? `edit-${editingTenant.id}` : `new-${modalVisible}`}
-  visible={modalVisible}
-  tenant={editingTenant}
-  onSave={handleSave}
-  onClose={() => { setModalVisible(false); setEditingTenant(null); }}
-/>
+          key={editingTenant ? `edit-${editingTenant.id}` : `new-${modalVisible}`}
+          visible={modalVisible}
+          tenant={editingTenant}
+          onSave={handleSave}
+          onClose={() => { setModalVisible(false); setEditingTenant(null); }}
+        />
       </div>
     );
   }
@@ -339,21 +381,16 @@ const revenueData = useMemo(() =>
           {/* Stats cards */}
           <div className="grid grid-cols-4 gap-5 mb-8">
             {[
-              { label: 'Total locataires', value: tenants.length, icon: Users, color: 'bg-accent/10 text-accent', trend: null },
-              { label: 'Locataires actifs', value: active.length, icon: CheckCircle, color: 'bg-green-50 dark:bg-green-900/20 text-green-500', trend: null },
-              { label: 'Revenus ce mois', value: `${formatNumber(totalRevenue)} FCFA`, icon: TrendingUp, color: 'bg-blue-50 dark:bg-blue-900/20 text-blue-500', trend: null },
-              { label: 'Alertes', value: expired.length + expiringSoon.length, icon: AlertCircle, color: 'bg-red-50 dark:bg-red-900/20 text-red-500', trend: null },
-            ].map(({ label, value, icon: Icon, color, trend }) => (
+              { label: 'Total locataires', value: tenants.length, icon: Users, color: 'bg-accent/10 text-accent' },
+              { label: 'Locataires actifs', value: active.length, icon: CheckCircle, color: 'bg-green-50 dark:bg-green-900/20 text-green-500' },
+              { label: 'Revenus ce mois', value: `${formatNumber(totalRevenue)} FCFA`, icon: TrendingUp, color: 'bg-blue-50 dark:bg-blue-900/20 text-blue-500' },
+              { label: 'Alertes', value: expired.length + expiringSoon.length, icon: AlertCircle, color: 'bg-red-50 dark:bg-red-900/20 text-red-500' },
+            ].map(({ label, value, icon: Icon, color }) => (
               <div key={label} className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm">
                 <div className="flex items-start justify-between mb-3">
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${color}`}>
                     <Icon size={18} />
                   </div>
-                  {trend && (
-                    <span className="text-xs font-semibold text-green-500 bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded-lg">
-                      {trend}
-                    </span>
-                  )}
                 </div>
                 <p className="text-2xl font-bold text-gray-800 dark:text-white">{value}</p>
                 <p className="text-xs text-gray-400 mt-1">{label}</p>
@@ -366,26 +403,19 @@ const revenueData = useMemo(() =>
             <div className="col-span-2 bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="font-bold text-gray-800 dark:text-white">Revenus</h2>
-                <span className="text-xs text-gray-400 bg-gray-50 dark:bg-gray-700 px-3 py-1.5 rounded-lg">6 derniers mois</span>
+                <span className="text-xs text-gray-400 bg-gray-50 dark:bg-gray-700 px-3 py-1.5 rounded-lg">
+                  6 derniers mois
+                </span>
               </div>
-              <ResponsiveContainer width="100%" height={200}>
-                <AreaChart data={revenueData}>
-                  <defs>
-                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#667eea" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#667eea" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 12, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
-                  <Tooltip
-                    contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '12px' }}
-                    formatter={(value) => [`${formatNumber(value)} FCFA`, 'Revenus']}
-                  />
-                  <Area type="monotone" dataKey="revenus" stroke="#667eea" strokeWidth={2.5} fill="url(#colorRevenue)" />
-                </AreaChart>
-              </ResponsiveContainer>
+
+              {/* ✅ Graphique chargé en lazy */}
+              <Suspense fallback={
+                <div className="h-52 flex items-center justify-center">
+                  <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+                </div>
+              }>
+                <RechartsChart data={revenueData} formatNumber={formatNumber} />
+              </Suspense>
             </div>
 
             <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
@@ -397,13 +427,29 @@ const revenueData = useMemo(() =>
                 </div>
               ) : (
                 <div className="flex flex-col gap-3 overflow-y-auto max-h-52">
-                  {[...expired.map(t => ({ t, type: 'expired' })), ...expiringSoon.map(t => ({ t, type: 'soon' }))].map(({ t, type }) => (
-                    <div key={t.id} className={`flex items-start gap-3 p-3 rounded-xl ${type === 'expired' ? 'bg-red-50 dark:bg-red-900/20' : 'bg-orange-50 dark:bg-orange-900/20'}`}>
-                      <AlertCircle size={16} className={`flex-shrink-0 mt-0.5 ${type === 'expired' ? 'text-red-500' : 'text-orange-500'}`} />
+                  {[
+                    ...expired.map(t => ({ t, type: 'expired' })),
+                    ...expiringSoon.map(t => ({ t, type: 'soon' }))
+                  ].map(({ t, type }) => (
+                    <div
+                      key={t.id}
+                      className={`flex items-start gap-3 p-3 rounded-xl ${
+                        type === 'expired' ? 'bg-red-50 dark:bg-red-900/20' : 'bg-orange-50 dark:bg-orange-900/20'
+                      }`}
+                    >
+                      <AlertCircle
+                        size={16}
+                        className={`flex-shrink-0 mt-0.5 ${type === 'expired' ? 'text-red-500' : 'text-orange-500'}`}
+                      />
                       <div>
-                        <p className="text-sm font-semibold text-gray-800 dark:text-white">{t.civility} {t.name}</p>
+                        <p className="text-sm font-semibold text-gray-800 dark:text-white">
+                          {t.civility} {t.name}
+                        </p>
                         <p className={`text-xs ${type === 'expired' ? 'text-red-500' : 'text-orange-500'}`}>
-                          {type === 'expired' ? `Expiré depuis ${Math.abs(getDaysUntilExpiry(t.endDate))}j` : `Expire dans ${getDaysUntilExpiry(t.endDate)}j`}
+                          {type === 'expired'
+                            ? `Expiré depuis ${Math.abs(getDaysUntilExpiry(t.endDate))}j`
+                            : `Expire dans ${getDaysUntilExpiry(t.endDate)}j`
+                          }
                         </p>
                       </div>
                     </div>
@@ -435,12 +481,12 @@ const revenueData = useMemo(() =>
       )}
 
       <TenantModal
-  key={editingTenant ? `edit-${editingTenant.id}` : `new-${modalVisible}`}
-  visible={modalVisible}
-  tenant={editingTenant}
-  onSave={handleSave}
-  onClose={() => { setModalVisible(false); setEditingTenant(null); }}
-/>
+        key={editingTenant ? `edit-${editingTenant.id}` : `new-${modalVisible}`}
+        visible={modalVisible}
+        tenant={editingTenant}
+        onSave={handleSave}
+        onClose={() => { setModalVisible(false); setEditingTenant(null); }}
+      />
     </div>
   );
 }
