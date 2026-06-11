@@ -17,7 +17,7 @@ export async function register(name, email, password) {
 
   // Envoie email de bienvenue via Vercel API
   try {
-    await fetch('/api/send-welcome', {
+    await fetch('https://getsmartbay.vercel.app/api/send-welcome', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -48,7 +48,7 @@ export async function loginWithGoogle() {
   // Envoie email de bienvenue si c'est la première connexion Google
   if (userCredential._tokenResponse?.isNewUser) {
     try {
-      await fetch('/api/send-welcome', {
+      await fetch('https://getsmartbay.vercel.app/api/send-welcome', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -81,7 +81,7 @@ export async function sendPasswordReset(email) {
 
 // Envoie email de mise à jour à tous les users — appelé manuellement par toi
 export async function sendUpdateEmailToAll({ subject, title, body, version, emails }) {
-  const res = await fetch('/api/send-update', {
+  const res = await fetch('https://getsmartbay.vercel.app/api/send-update', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
