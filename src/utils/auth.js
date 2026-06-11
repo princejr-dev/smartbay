@@ -90,7 +90,7 @@ export async function sendUpdateEmailToAll({ subject, title, body, version, emai
       body,
       version,
       emails,
-      adminKey: import.meta.env.ADMIN_SECRET_KEY,
+      adminKey: import.meta.env.VITE_ADMIN_SECRET_KEY,
     }),
   });
   return res.json();

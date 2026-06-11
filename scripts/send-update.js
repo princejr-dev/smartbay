@@ -47,7 +47,7 @@ async function sendUpdate() {
         body: BODY,
         version: VERSION,
         emails: EMAILS,
-        adminKey: ADMIN_SECRET_KEY,
+        adminKey: import.meta.env.VITE_ADMIN_SECRET_KEY,
       }),
     });
 
