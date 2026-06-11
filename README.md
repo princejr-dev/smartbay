@@ -1,10 +1,10 @@
-# SmartBay 🏠
+# SmartBay
 
 **SmartBay** est une application web de gestion locative intelligente, conçue pour les propriétaires immobiliers souhaitant gérer leurs locataires simplement et efficacement.
 
 ---
 
-## ✨ Fonctionnalités clés
+## Fonctionnalités clés
 
 - **Gestion des locataires** — Ajout, modification et suppression de locataires avec toutes leurs informations (civilité, nom, téléphone, loyer, durée, date d'entrée et une avance optionnelle)
 - **Reçus PDF automatiques** — Génération de reçus professionnels en un clic, et partageables
@@ -15,7 +15,7 @@
 
 ---
 
-## 🛠 Stack technique
+## Stack technique
 
 | Technologie | Usage |
 |-------------|-------|
@@ -28,41 +28,46 @@
 
 ---
 
-## 📁 Structure du projet
+## Structure du projet
 
+```
 src/
 ├── components/
-|   ├── FolderCard.jsx      # Carte locataire (version PC)
-│   ├── Navbar.jsx          # Barre de navigation mobile (bas de page)
-│   ├── PCHeader.jsx        # Header version PC (recherche, thème, alertes, Profil)
-│   ├── Sidebar.jsx         # Sidebar fixe version PC
-│   ├── TenantCard.jsx      # Carte locataire (version mobile)
-│   └── TenantModal.jsx     # Modal ajout/modification locataire
+|   ├── FolderCard.jsx            # Carte locataire
+│   ├── Navbar.jsx                # Barre de navigation mobile
+│   ├── PCHeader.jsx              # Header version PC
+│   ├── Sidebar.jsx               # Sidebar fixe version PC
+│   ├── TenantCard.jsx            # Carte locataire
+│   └── TenantModal.jsx           # Modal ajout/modification locataire
+|
 ├── pages/
-│   ├── Dashboard.jsx       # Dashboard version mobile
-│   ├── Landing.jsx         # Page d'accueil publique
-│   ├── Login.jsx           # Page d'inscription
-│   ├── Notifications.jsx   # Page alertes
-│   ├── PCDashboard.jsx     # Dashboard version PC
-│   ├── PCReceipts.jsx      # Page reçus version PC
-│   ├── Register.jsx        # Page de connexion
-│   ├── Settings.jsx        # Page paramètres
-│   ├── TenantFolder.jsx            # Dossier locataire (version PC)
-│   ├── TenantFolderDetail.jsx      # Détails des locataires (version PC)
-│   └── Tenants.jsx         # Liste locataires (version mobile)
+│   ├── Dashboard.jsx             # Dashboard version mobile
+│   ├── Landing.jsx               # Page d'accueil publique
+│   ├── Login.jsx                 # Page d'inscription
+│   ├── Notifications.jsx         # Page alertes
+│   ├── PCDashboard.jsx           # Dashboard version PC
+│   ├── PCReceipts.jsx            # Page reçus
+│   ├── Register.jsx              # Page de connexion
+│   ├── Settings.jsx              # Page paramètres
+│   ├── TenantFolder.jsx          # Dossier locataire
+│   ├── TenantFolderDetail.jsx    # Détails des locataires
+│   └── Tenants.jsx               # Liste locataires
+|
 ├── utils/
-│   ├── auth.js             # Fonctions d'authentifications (email/password + nom)
-│   ├── firestore.js        # Fonctions de données utilisateurs
-│   ├── helpers.js          # Fonctions utilitaires (dates, nombres, etc.)
-│   └── receipt.js          # Génération reçu HTML/PDF        
-├── App.jsx                 # Composant racine + routing
-├── firebase.js             # Gestion d'API
-├── index.css               # Styles
-└── main.jsx                # Point d'entrée React
+│   ├── auth.js                   # Fonctions d'authentifications
+│   ├── firestore.js              # Fonctions de données utilisateurs
+│   ├── helpers.js                # Fonctions utilitaires
+│   └── receipt.js                # Génération reçu HTML/PDF  
+|      
+├── App.jsx                       # Composant racine + routing
+├── firebase.js                   # Gestion d'API
+├── index.css                     # Styles
+└── main.jsx                      # Point d'entrée React
+```
 
 ---
 
-## 🚀 Installation et lancement
+## Installation et lancement
 
 ### Prérequis
 - Node.js >= 18
@@ -90,7 +95,7 @@ npm run preview
 
 ---
 
-## 📱 Utilisation
+## Utilisation
 
 ### Version mobile
 1. Ouvrir l'application sur smartphone
@@ -111,7 +116,7 @@ npm run preview
 
 ---
 
-## 📄 Structure d'un reçu PDF
+## Structure d'un reçu PDF
 
 Chaque reçu généré contient :
 
@@ -127,7 +132,7 @@ Chaque reçu généré contient :
 
 ---
 
-## 🗺 Roadmap
+## Roadmap
 
 - [x] Gestion CRUD des locataires
 - [x] Génération reçus PDF
@@ -143,11 +148,11 @@ Chaque reçu généré contient :
 - [ ] Numéro CNI locataire
 - [ ] Outil d'enregistrement de signature
 - [ ] Assistant IA intégré
-- [ ] Application mobile native (Flutter)
+- [ ] Application mobile native (React Native)
 
 ---
 
-## 🌍 Déploiement
+## Déploiement
 
 L'application est déployée sur **Vercel** :
 
@@ -158,7 +163,7 @@ L'application est déployée sur **Vercel** :
 
 ---
 
-## 👨‍💻 Développement
+## Développement
 
 ### Conventions de code
 - Composants React en **PascalCase** (ex: `TenantCard.jsx`)
@@ -173,12 +178,12 @@ L'application est déployée sur **Vercel** :
 
 ---
 
-## 📝 Licence MIT
+## Licence MIT
 
 Projet privé — © 2026 SmartBay. Tous droits réservés.
 
 ---
 
-## 🙏 Remerciements
+## Remerciements
 
-Développé par Prince Jr, Cameroun.
+Développé par Prince Jr.
