@@ -18,6 +18,7 @@ function emailTemplate({ title, body, buttonText, buttonUrl }) {
         <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.08);">
           <tr>
             <td style="background:linear-gradient(135deg,#667eea,#764ba2);padding:40px;text-align:center;">
+              <img src="https://getsmartbay.vercel.app/favicon.png" alt="SmartBay" width="50" style="display:block;margin:0 auto 16px;border-radius:12px;">
               <h1 style="color:white;font-size:28px;margin:0;letter-spacing:2px;">SmartBay</h1>
               <p style="color:rgba(255,255,255,0.8);margin:8px 0 0;font-size:14px;">Gestion locative intelligente</p>
             </td>
@@ -37,9 +38,8 @@ function emailTemplate({ title, body, buttonText, buttonUrl }) {
           <tr>
             <td style="background:#f8f8f8;padding:24px 40px;text-align:center;border-top:1px solid #eee;">
               <p style="color:#999;font-size:12px;margin:0;">
-                © 2025 SmartBay — Gestion locative intelligente<br>
+                © 2026 SmartBay — Gestion locative intelligente<br>
                 Douala, Cameroun<br><br>
-                <a href="https://getsmartbay.vercel.app" style="color:#667eea;text-decoration:none;">getsmartbay.vercel.app</a>
               </p>
             </td>
           </tr>

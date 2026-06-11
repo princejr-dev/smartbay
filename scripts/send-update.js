@@ -18,7 +18,7 @@ const BODY = `
     <li style="margin-bottom:8px;">Mise à jour des dépendances pour plus de sécurité</li>
   </ul>
     <p>Nous vous invitons à vous connecter dès maintenant pour découvrir ces améliorations et 
-    continuer à gérer vos locations en toute simplicité.</p>
+    continuer à gérer vos locataires en toute simplicité.</p>
     <p>Merci de votre confiance,</p>
     <p style="margin-top:16px;">L'équipe SmartBay</p>
   </p>
