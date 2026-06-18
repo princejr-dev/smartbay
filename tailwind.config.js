@@ -14,7 +14,6 @@ export default {
       fontFamily: {
         audiowide: ['Audiowide', 'sans-serif'],
       },
-      // Ajoute ceci
       keyframes: {
         'slide-in': {
           from: { opacity: '0', transform: 'translateY(-20px)' },

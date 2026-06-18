@@ -2,7 +2,7 @@
 // node scripts/send-update.js
 
 // ⚠️ Mets à jour ces infos avant chaque envoi
-const VERSION = 'v1.0.1';
+const VERSION = 'v1.1.3';
 const SUBJECT = '🚀 SmartBay — Mise à jour disponible !';
 const TITLE = 'Mise à jour disponible';
 const BODY = `
@@ -13,9 +13,9 @@ const BODY = `
   <p>Voici un aperçu des nouveautés :</p>
   <ul style="padding-left:20px;">
     <li style="margin-bottom:8px;">Optimisation des performances générales de la plateforme</li>
+    <li style="margin-bottom:8px;">Ajout de nouvelles fonctionnalités</li>
+    <li style="margin-bottom:8px;">Corrections de bugs mineurs pour une expérience plus fluide</li>
     <li style="margin-bottom:8px;">Amélioration de l'interface utilisateur</li>
-    <li style="margin-bottom:8px;">Corrections de bugs</li>
-    <li style="margin-bottom:8px;">Mise à jour des dépendances pour plus de sécurité</li>
   </ul>
     <p>Nous vous invitons à vous connecter dès maintenant pour découvrir ces améliorations et 
     continuer à gérer vos locataires en toute simplicité.</p>
@@ -29,6 +29,12 @@ const BODY = `
 // Authentication → Users → exporter la liste
 const EMAILS = [
   'mprincegame@gmail.com',
+  'kevinnkb99@gmail.com',
+  'gnjitate@gmail.com',
+  'sonkengstephan@gmail.com',
+  'tests@builderswave.com',
+  'kafnode@gmail.com',
+  'arifwado917@gmail.com',
 ];
 
 // 🔐 Ta clé admin (même valeur que ADMIN_SECRET_KEY sur Vercel)

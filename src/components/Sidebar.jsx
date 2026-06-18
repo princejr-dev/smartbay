@@ -71,7 +71,7 @@ export default function Sidebar({ activePage, onNavigate, onLogout }) {
           Se déconnecter
         </button>
 
-        <p className="mt-2 px-4 text-xs text-gray-400">SmartBay v1.0.1</p>
+        <p className="mt-2 px-4 text-xs text-gray-400">SmartBay v1.1.3</p>
       </div>
 
       {showLogout && (

@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Search, X, FolderOpen, Archive, CheckCircle, AlertCircle, Trash2 } from 'lucide-react';
+import { Search, X, FolderOpen, Archive, CheckCircle, AlertCircle, Trash2, ArrowLeft } from 'lucide-react';
 import FolderCard from '../components/FolderCard';
 import { fetchTenants, archiveTenant, deleteTenant } from '../utils/firestore';
 import { getDaysUntilExpiry } from '../utils/helpers';
 
-export default function TenantFolder({ user, onOpenDetail }) {
+export default function TenantFolder({ user, onOpenDetail, onBack }) {
   const [tenants, setTenants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -101,10 +101,29 @@ export default function TenantFolder({ user, onOpenDetail }) {
   ];
 
   return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+
+      {/* Header mobile */}
+    <div className="md:hidden bg-gradient-to-br from-accent to-accent-dark px-6 pt-12 pb-6 sticky top-0 z-20">
+      <div className="flex items-center gap-4 mb-1">
+        <button
+          onClick={onBack}
+          className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors"
+        >
+          <ArrowLeft size={20} className="text-white" />
+        </button>
+        <h1 className="text-white text-2xl font-bold">Dossiers</h1>
+      </div>
+      <p className="text-white/70 text-sm font-semibold ml-13">
+        {tenants.filter(t => t.status !== 'archived').length} dossier{tenants.length > 1 ? 's' : ''} actif{tenants.length > 1 ? 's' : ''}
+      </p>
+    </div>
+
+    {/* Contenu avec padding — PC uniquement pour le titre */}
     <div className="p-8">
 
       {/* Titre */}
-      <div className="mb-8">
+      <div className="hidden md:block mb-8">
         <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Dossiers locataires</h1>
         <p className="text-gray-400 text-sm mt-1">
           {tenants.filter(t => t.status !== 'archived').length} dossier{tenants.length > 1 ? 's' : ''} actif{tenants.length > 1 ? 's' : ''}
@@ -143,7 +162,7 @@ export default function TenantFolder({ user, onOpenDetail }) {
       </div>
 
       {/* Recherche */}
-      <div className="flex items-center gap-3 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 rounded-xl px-4 mb-4 focus-within:border-accent transition-colors">
+      <div className="flex items-center gap-3 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 rounded-xl px-4 mb-4 focus-within:border-accent dark:focus-within:border-accent transition-colors">
         <Search size={18} className="text-accent flex-shrink-0" />
         <input
           type="text"
@@ -220,5 +239,6 @@ export default function TenantFolder({ user, onOpenDetail }) {
         </div>
       )}
     </div>
+  </div>
   );
 }

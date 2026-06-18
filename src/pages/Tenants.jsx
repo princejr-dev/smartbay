@@ -180,7 +180,7 @@ export default function Tenants({ onBack, modalOpen, onModalClose, user }) {
       <div className="px-5 pt-5">
 
         {/* Recherche */}
-        <div className="flex items-center gap-3 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 rounded-xl px-4 mb-4 focus-within:border-accent">
+        <div className="flex items-center gap-3 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 rounded-xl px-4 mb-4 focus-within:border-accent dark:focus-within:border-accent">
           <Search size={18} className="text-accent flex-shrink-0" />
           <input
             type="text"

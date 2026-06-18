@@ -3,3 +3,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.blog-content h1 { font-size: 2rem; font-weight: 800; margin: 1rem 0; }
+.blog-content h2 { font-size: 1.3rem; font-weight: 700; margin: 1rem 0; color: #667eea; }
+.blog-content p { line-height: 1.7; margin: 0.8rem 0; }
+.blog-content ul { padding-left: 1.2rem; list-style: disc; margin: 0.8rem 0; }
+
+/* DARK MODE */
+.dark .blog-content p, .dark .blog-content ul {
+  color: #e5e7eb;
+}

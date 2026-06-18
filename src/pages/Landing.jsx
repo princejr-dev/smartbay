@@ -114,6 +114,12 @@ export default function Landing({ onEnterApp, onNavigateLegal }) {
               Comment ça marche ?
             </a>
             <button
+              onClick={() => onNavigateLegal('blog')}
+              className="text-gray-600 dark:text-gray-300 hover:text-accent transition-colors text-sm"
+            >
+              Blog
+            </button>
+            <button
               type="button"
               onClick={handleEnterApp}
               className="rounded-xl bg-gradient-to-r from-accent to-accent-dark px-5 py-2.5 text-sm font-semibold text-white transition-all hover:opacity-90"
@@ -152,6 +158,12 @@ export default function Landing({ onEnterApp, onNavigateLegal }) {
               className="block border-t border-gray-100 px-5 py-4 text-sm text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-800 dark:text-gray-300 dark:hover:bg-gray-800"
             >
               Comment ça marche ?
+            </a>
+            <a
+              onClick={() => onNavigateLegal('blog')}
+              className="block border-t border-gray-100 px-5 py-4 text-sm text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-800 dark:text-gray-300 dark:hover:bg-gray-800"
+            >
+              Blog
             </a>
             <button
               type="button"

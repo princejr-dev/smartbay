@@ -6,6 +6,7 @@ import Notifications from './pages/Notifications';
 import Settings from './pages/Settings';
 import Tenants from './pages/Tenants';
 import PCDashboard from './pages/PCDashboard';
+import { Plus } from 'lucide-react';
 
 // Pages mobiles où la navbar du bas gênerait l'expérience.
 const MOBILE_PAGES_WITHOUT_NAVBAR = ['tenants', 'notifications', 'settings'];
@@ -34,6 +35,10 @@ const Register = lazy(() => import('./pages/Register'));
 const TenantFolder = lazy(() => import('./pages/TenantFolder'));
 const TenantFolderDetail = lazy(() => import('./pages/TenantFolderDetail'));
 const TermsOfService = lazy(() => import('./pages/TermsOfService'));
+const HelpCenter = lazy(() => import('./pages/HelpCenter'));
+const MobileReceipts = lazy(() => import('./pages/MobileReceipts'));
+const Blog = lazy(() => import('./pages/Blog'));
+const BlogPost = lazy(() => import('./pages/BlogPost'));
 
 // Composants toujours chargés (petits)
 import Navbar from './components/Navbar';
@@ -52,6 +57,7 @@ export default function App() {
   const [showLanding, setShowLanding] = useState(false);
   const [theme, setTheme] = useState(getInitialTheme);
   const [user, setUser] = useState(null);
+  const [selectedPost, setSelectedPost] = useState(null);
 
   // Firebase garde l'utilisateur en mémoire et prévient l'app à chaque changement.
   useEffect(() => {
@@ -118,34 +124,73 @@ export default function App() {
 
   // Rendu dédié au mobile: certaines pages ont un comportement différent de la version PC.
   const renderMobilePage = () => {
-    switch (activePage) {
-      case 'tenants':
-        return (
-          <Tenants
-            key="tenants"
-            modalOpen={modalOpen}
-            onBack={goToDashboard}
-            onModalClose={() => setModalOpen(false)}
-            onNavigate={handleNavigate}
-            user={user}
-          />
-        );
-      case 'notifications':
-        return <Notifications onBack={goToDashboard} user={user} />;
-      case 'settings':
-        return (
-          <Settings
-            onBack={goToDashboard}
-            onLogout={handleLogout}
-            onThemeChange={handleThemeChange}
-            user={user}
-          />
-        );
-      case 'dashboard':
-      default:
-        return <Dashboard onNavigate={handleNavigate} user={user} />;
-    }
-  };
+  // Page détail dossier — prioritaire
+  if (selectedTenant && activePage === 'folders') {
+    return (
+      <TenantFolderDetail
+        tenant={selectedTenant}
+        user={user}
+        onBack={() => setSelectedTenant(null)}
+      />
+    );
+  }
+
+  switch (activePage) {
+    case 'dashboard':
+      return <Dashboard onNavigate={handleNavigate} user={user} onLogout={handleLogout} />;
+    case 'tenants':
+      return (
+        <Tenants
+          key="tenants"
+          onNavigate={handleNavigate}
+          modalOpen={modalOpen}
+          onModalClose={() => setModalOpen(false)}
+          onBack={() => setActivePage('dashboard')}
+          user={user}
+        />
+      );
+    case 'folders':
+      return (
+        <TenantFolder
+          user={user}
+          onOpenDetail={(tenant) => setSelectedTenant(tenant)}
+          onBack={() => setActivePage('dashboard')}
+        />
+      );
+    case 'receipts':
+      return <MobileReceipts user={user} onBack={() => setActivePage('dashboard')} />;
+    case 'notifications':
+      return <Notifications onBack={() => setActivePage('dashboard')} user={user} />;
+    case 'settings':
+      return (
+        <Settings
+          onBack={() => setActivePage('dashboard')}
+          onThemeChange={handleThemeChange}
+          onLogout={handleLogout}
+          user={user}
+        />
+      );
+    case 'help':
+      return (
+        <HelpCenter
+          onBack={() => setActivePage('dashboard')}
+          onNavigateLegal={setLegalPage}
+        />
+      );
+    case 'blog':
+      return (
+        <Blog
+          onBack={() => setActivePage('dashboard')}
+          onReadPost={(post) => {
+            setSelectedPost(post);
+            setLegalPage('blog-post');
+          }}
+        />
+      );
+    default:
+      return <Dashboard onNavigate={handleNavigate} user={user} onLogout={handleLogout} />;
+  }
+};
 
   // Rendu dédié au PC: la page détail d'un dossier est prioritaire sur la liste.
   const renderPCPage = () => {
@@ -193,6 +238,29 @@ export default function App() {
   if (legalPage === 'terms') {
     return <TermsOfService onBack={() => setLegalPage(null)} />;
   }
+
+  // Pages blog — accessibles sans connexion
+if (legalPage === 'blog') {
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <Blog
+        onBack={() => { setLegalPage(null); setSelectedPost(null); }}
+        onReadPost={(post) => { setSelectedPost(post); setLegalPage('blog-post'); }}
+      />
+    </Suspense>
+  );
+}
+
+if (legalPage === 'blog-post' && selectedPost) {
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <BlogPost
+        post={selectedPost}
+        onBack={() => setLegalPage('blog')}
+      />
+    </Suspense>
+  );
+}
 
   if (authLoading) {
     return (
@@ -261,6 +329,7 @@ export default function App() {
         </div>
       </div>
 
+      {/** Version mobile */}
       <div className="md:hidden">
         <main className="mx-auto max-w-2xl pb-24">
           <Suspense fallback={<PageLoader />}>
@@ -268,16 +337,17 @@ export default function App() {
           </Suspense>
         </main>
 
-        {showMobileNavbar && (
-          <Navbar
-            activePage={activePage}
-            hidden={modalOpen}
-            onNavigate={handleNavigate}
-            user={user}
-          />
-        )}
+        {/* Bouton + flottant — visible partout sauf sur tenants */}
+         {activePage !== 'blog' && activePage !== 'receipts' && activePage !== 'folders' && activePage !== 'help' && activePage !== 'settings' && activePage !== 'notifications' && activePage !== 'tenants' && (
+           <button
+             onClick={() => handleNavigate('add')}
+             className="fixed bottom-6 right-6 z-40 w-14 h-14 bg-gradient-to-br from-accent to-accent-dark text-white rounded-full flex items-center justify-center shadow-xl hover:scale-110 transition-transform"
+           >
+            <Plus size={26} />
+           </button>
+          )}
+        </div>
       </div>
-    </div>
     </Suspense>
   );
 }

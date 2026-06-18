@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { AlertCircle, Eye, EyeOff, Lock, Mail } from 'lucide-react';
-import { login, loginWithGoogle } from '../utils/auth';
+import { login, loginWithGoogle, sendPasswordReset } from '../utils/auth';
 
 // Traduit les codes d'erreur Firebase en messages lisibles pour l'utilisateur.
 const getLoginErrorMessage = (code) => {
@@ -27,6 +27,10 @@ export default function Login({ onNavigate }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [resetMode, setResetMode] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetSuccess, setResetSuccess] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
 
   // Connexion classique par email et mot de passe.
   const handleLogin = async (event) => {
@@ -64,6 +68,24 @@ export default function Login({ onNavigate }) {
       setGoogleLoading(false);
     }
   };
+
+  // Fonction pour gérer la réinitialisation du mot de passe.
+const handlePasswordReset = async () => {
+  if (!resetEmail) {
+    setError('Entrez votre adresse email.');
+    return;
+  }
+  setResetLoading(true);
+  setError('');
+  try {
+    await sendPasswordReset(resetEmail);
+    setResetSuccess(true);
+  } catch {
+    setError('Email introuvable ou erreur. Réessayez.');
+  } finally {
+    setResetLoading(false);
+  }
+};
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-50 dark:bg-gray-900">
@@ -134,6 +156,16 @@ export default function Login({ onNavigate }) {
           </button>
         </div>
 
+        {/* Lien mot de passe oublié */}
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={() => setResetMode(true)}
+            className="text-accent text-sm hover:underline"
+          >
+          Mot de passe oublié ?
+         </button>
+        </div>
+
         <button
           type="submit"
           disabled={loading}
@@ -185,6 +217,74 @@ export default function Login({ onNavigate }) {
           </svg>
           {googleLoading ? 'Connexion...' : 'Continuer avec Google'}
         </button>
+
+          {/* Formulaire de réinitialisation du mot de passe */}
+          {/* Modal réinitialisation mot de passe */}
+{resetMode && (
+  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
+    <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-sm shadow-xl">
+
+      {resetSuccess ? (
+        // Succès
+        <div className="text-center">
+          <div className="w-14 h-14 rounded-2xl bg-green-50 flex items-center justify-center mx-auto mb-4">
+            <Mail size={24} className="text-green-500" />
+          </div>
+          <h3 className="font-bold text-gray-800 dark:text-white mb-2">Email envoyé !</h3>
+          <p className="text-gray-400 text-sm mb-4">
+            Vérifiez votre boîte mail et suivez les instructions pour réinitialiser votre mot de passe.
+          </p>
+          <button
+            type="button"
+            onClick={() => { setResetMode(false); setResetSuccess(false); }}
+            className="w-full py-3 bg-gradient-to-r from-accent to-accent-dark text-white rounded-xl font-semibold"
+          >
+            Fermer
+          </button>
+        </div>
+      ) : (
+        // Formulaire
+        <>
+          <h3 className="font-bold text-gray-800 dark:text-white mb-2 text-center text-xl">
+            Mot de passe oublié ?
+          </h3>
+          <p className="text-gray-400 text-sm mb-4 text-center">
+            Entrez votre email et nous vous enverrons un lien de réinitialisation.
+          </p>
+
+          <div className="flex items-center gap-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl px-4 mb-4 focus-within:border-accent">
+            <Mail size={18} className="text-accent flex-shrink-0" />
+            <input
+              type="email"
+              placeholder="exemple@gmail.com"
+              value={resetEmail}
+              onChange={e => setResetEmail(e.target.value)}
+              className="flex-1 py-3 bg-transparent outline-none text-gray-800 dark:text-white placeholder-gray-400 text-sm"
+            />
+          </div>
+
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={() => { setResetMode(false); setError(''); }}
+              className="flex-1 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 text-gray-500 font-semibold hover:border-gray-400 hover:text-gray-700 transition-colors"
+            >
+              Annuler
+            </button>
+            <button
+              type="button"
+              onClick={handlePasswordReset}
+              disabled={resetLoading}
+              className="flex-1 py-3 rounded-xl bg-gradient-to-r from-accent to-accent-dark text-white font-semibold disabled:opacity-50 hover:opacity-90 transition-opacity"
+            >
+              {resetLoading ? 'Envoi...' : 'Envoyer'}
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  </div>
+)}
       </form>
     </div>
   );

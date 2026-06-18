@@ -279,7 +279,7 @@ const showToast = (msg) => {
               </div>
               <p className="font-semibold text-gray-800 dark:text-white text-sm">Version</p>
             </div>
-            <span className="text-gray-400 text-sm">v1.0.1</span>
+            <span className="text-gray-400 text-sm">v1.1.3</span>
           </div>
         </div>
 
