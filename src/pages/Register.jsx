@@ -292,13 +292,14 @@ export default function Register({ onNavigate, onNavigateLegal }) {
           <div className="h-px flex-1 bg-gray-200 dark:bg-gray-600" />
         </div>
 
+        {/* Connexion avec Google */}
         <button
           type="button"
           onClick={handleGoogleLogin}
           disabled={googleLoading || !acceptedTerms}
           className="flex w-full items-center justify-center gap-3 rounded-xl border-2 border-gray-200 py-3.5 text-sm font-semibold text-gray-700 transition-all hover:border-accent hover:bg-accent/5 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:text-gray-300"
         >
-          <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 18 18" aria-hidden="true">
             <path
               fill="#4285F4"
               d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 0 0 2.38-5.88c0-.57-.05-.66-.15-1.18z"

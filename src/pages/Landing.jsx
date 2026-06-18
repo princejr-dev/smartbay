@@ -60,7 +60,7 @@ const steps = [
   {
     number: '01',
     title: 'Créez un locataire',
-    desc: 'Remplissez les informations du locataire : nom, loyer, durée et date de début.',
+    desc: 'Remplissez les informations du locataire.',
   },
   {
     number: '02',
@@ -186,7 +186,7 @@ export default function Landing({ onEnterApp, onNavigateLegal }) {
             className="mb-8 inline-flex items-center gap-2 rounded-full bg-accent/10 px-4 py-2 text-sm font-semibold text-accent"
           >
             <AlertCircle size={14} />
-            Gestion locative simplifiée
+            Gestion locative intelligente
           </div>
 
           <h1 className="mb-6 text-4xl font-bold leading-tight text-gray-900 dark:text-white md:text-6xl">
@@ -232,7 +232,7 @@ export default function Landing({ onEnterApp, onNavigateLegal }) {
               Tout ce dont vous avez besoin
             </h2>
             <p className="mx-auto max-w-xl text-gray-500 dark:text-gray-400">
-              Une application simple et efficace pour les propriétaires immobiliers.
+              Une application web simple et efficace pour les propriétaires immobiliers.
             </p>
           </div>
 
@@ -330,6 +330,13 @@ export default function Landing({ onEnterApp, onNavigateLegal }) {
               &copy; 2026 SmartBay. Tous droits réservés.
             </p>
             <div className="flex items-center gap-6">
+              <button
+              onClick={() => onNavigateLegal('blog')}
+              className="text-sm text-gray-400 transition-colors hover:text-accent"
+              >
+                Blog
+              </button>
+              <span className="text-gray-700">•</span>
               <button
                 type="button"
                 onClick={() => onNavigateLegal('privacy')}
